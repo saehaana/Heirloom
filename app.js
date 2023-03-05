@@ -18,5 +18,13 @@ client.on('ready', c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
+client.on('interactionCreate', interaction => {
+	if(!interaction.isChatInputCommand()) return;
+
+	if(interaction.commandName === 'hey'){
+		interaction.reply('hey');
+	}
+});
+
 // Log in to Discord with your client's token
 client.login(token);
