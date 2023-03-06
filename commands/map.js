@@ -8,6 +8,6 @@ module.exports = {
 		.setDescription('Gets the current map rotation'),
 	async execute(interaction) {
         const response = await axios.get(`https://api.mozambiquehe.re/maprotation?auth=${apexToken}`);
-        await interaction.reply(`${response.data.current.map}`);
+        await interaction.reply(`Current: ${response.data.current.map} \nNext: ${response.data.next.map}`);
     },
 };
