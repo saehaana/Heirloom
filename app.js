@@ -1,5 +1,4 @@
 // Require the necessary discord.js classes
-
 //read commands directory and identify command files
 const fs = require('node:fs'); 
 //contruct paths to access files and directories
@@ -20,9 +19,14 @@ const client = new Client({
 //store and get commands for execution
 client.commands = new Collection();
 
+//get command files
+//constructs path to commands directory
 const commandsPath = path.join(__dirname, 'commands');
+//reads path to directory and returns array of all javascript files  
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
+//get event files
+//constructs path to events directory
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
