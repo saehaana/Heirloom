@@ -12,6 +12,7 @@ module.exports = {
     
         const embed = new EmbedBuilder()
             .setColor('Green')
+            .setDescription('Data from apexlegendsstatus.com')
             .addFields(
                 { name: 'Lobby/Matchmaking Servers', value: `${response.data.EA_novafusion['US-East'].Status}`},
                 { name: 'Origin Logins', value: `${response.data.Origin_login['US-East'].Status}`, inline: true },
@@ -20,7 +21,21 @@ module.exports = {
             )
 	        .setTimestamp();
 
-        console.log(response.data);
+        if(response.data.EA_novafusion['US-East'].Status == 'SLOW'
+            || response.data.Origin_login['US-East'].Status == 'SLOW'
+            || response.data.EA_accounts['US-East'].Status == 'SLOW'
+            || response.data.selfCoreTest['Status-website'].Status == 'SLOW')
+        {
+            embed.setColor('Yellow');
+        }
+        if(response.data.EA_novafusion['US-East'].Status == 'DOWN' 
+            || response.data.Origin_login['US-East'].Status == 'DOWN' 
+            || response.data.EA_accounts['US-East'].Status == 'DOWN'
+            || response.data.selfCoreTest['Status-website'].Status == 'DOWN')
+        {
+            embed.setColor('Red');
+        }
+
         await interaction.reply({ embeds: [embed] });
 	},
 };
