@@ -4,12 +4,14 @@ const axios = require('axios');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('craft')
-		.setDescription('Gets the current replicator items'),
+		.setName('test')
+		.setDescription('test command'),
 	async execute(interaction) {
         let response = await axios.get(`https://api.mozambiquehe.re/crafting?auth=${apexToken}`);
 
-		//Images for each item that holds name and cost data for both daily and weekly crafts
+        console.log(`${response.data[0].bundleContent[0].itemType.asset}`);
+
+        //Images for each item that holds name and cost data for both daily and weekly crafts
         //Use same url to add more images to single embed
         let dailyEmbed1 = new EmbedBuilder()
         .setTitle('Daily Craft Rotation')
@@ -38,7 +40,33 @@ module.exports = {
         let weeklyEmbed2 = new EmbedBuilder()
         .setURL(`${response.data[1].bundleContent[0].itemType.asset}`)
         .setImage(`${response.data[1].bundleContent[1].itemType.asset}`);
-        
-        await interaction.reply({ embeds: [dailyEmbed1,dailyEmbed2,weeklyEmbed1,weeklyEmbed2]});
+    
+        // //change daily embed colors based on craft item rarity
+        // if(`${response.data[0].bundleContent[0].itemType.rarity}` == 'Epic'){
+        //     dailyEmbed1.setColor('Purple');
+        // }else{
+        //     dailyEmbed1.setColor('Blue');
+        // }
+
+        // if(`${response.data[0].bundleContent[1].itemType.rarity}` == 'Epic'){
+        //     dailyEmbed2.setColor('Purple');
+        // }else{
+        //     dailyEmbed2.setColor('Blue');
+        // }
+
+        // //change weekly embed colors based on craft item rarity
+        // if(`${response.data[1].bundleContent[0].itemType.rarity}` == 'Epic'){
+        //     weeklyEmbed1.setColor('Purple');
+        // }else{
+        //     weeklyEmbed1.setColor('Blue');
+        // }
+
+        // if(`${response.data[1].bundleContent[1].itemType.rarity}` == 'Epic'){
+        //     weeklyEmbed2.setColor('Purple');
+        // }else{
+        //     weeklyEmbed2.setColor('Blue');
+        // }
+
+		await interaction.reply({ embeds: [dailyEmbed1,dailyEmbed2,weeklyEmbed1,weeklyEmbed2]});
 	},
 };
