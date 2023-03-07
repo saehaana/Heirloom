@@ -1,5 +1,5 @@
 const {REST, Routes} = require('discord.js');
-const {token, clientID, testGuildID} = require('./config.json');
+const {token, clientID, testGuildID, realGuildID} = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -22,6 +22,10 @@ const rest = new REST({version : '10'}).setToken(token);
     try{
         console.log('Registering slash commands..');
         
+        await rest.put(
+            Routes.applicationGuildCommands(clientID, realGuildID),
+            {body : commands}
+        );
         await rest.put(
             Routes.applicationGuildCommands(clientID, testGuildID),
             {body : commands}
