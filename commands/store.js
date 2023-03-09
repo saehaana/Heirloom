@@ -18,7 +18,6 @@ module.exports = {
 
             //Get each item in bundle
             for(const item in response.data[bundle].content){
-                console.log(response.data[bundle].content[item].name);
                 storeEmbed.addFields({ name: `Item ${item}`, value: `${response.data[bundle].content[item].name}`, inline: true })
             }
 

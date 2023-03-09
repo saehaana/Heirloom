@@ -20,7 +20,7 @@ module.exports = {
         let nextMapEmbed = new EmbedBuilder()
         .addFields
         ({ name: 'Next', value: `${response.data.ranked.next.map}`, inline: true },
-        { name: 'Start', value: `${response.data.ranked.next.readableDate_start}`, inline: true })
+        { name: 'Start', value: `${response.data.ranked.next.readableDate_start} UTC`, inline: true })
 	    .setImage(`${response.data.ranked.next.asset}`);
 
 		// let currentDeathmatchEmbed = new EmbedBuilder()
