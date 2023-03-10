@@ -39,7 +39,7 @@ module.exports = {
             const username = interaction.member.user.username;
             
             if(interaction.customId == 'join'){
-                usernames.push(username);
+                usernames.add(username);
             }else if(interaction.customId == 'leave'){
                 const index = usernames.indexOf(username);
                 if(index !== -1){
