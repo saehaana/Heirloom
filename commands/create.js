@@ -29,7 +29,7 @@ module.exports = {
 
         // Create a message component collector to listen for button clicks
         const filter = i => i.customId === 'join' || i.customId === 'leave';
-        const collector = interaction.createMessageComponentCollector({ filter, time: 15000 });
+        const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
 
         // Define an array to store the usernames of users who have joined
         const usernames = []; 
