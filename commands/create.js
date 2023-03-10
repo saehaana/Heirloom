@@ -32,7 +32,7 @@ module.exports = {
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
 
         // Define an array to store the usernames of users who have joined
-        const usernames = []; 
+        const usernames = new Set([]); 
 
         // Handle button clicks
         collector.on('collect', async interaction => {
@@ -48,12 +48,15 @@ module.exports = {
                 }
             }
 
+            // Convert set to array
+            const usernamesArray = Array.from(usernames);
+
             // Create a new embed with the updated list of usernames
             const updatedEmbed = new EmbedBuilder()
                 .setColor('Blue')
                 .setTitle('Lobby')
                 .setDescription(`Team 1`)
-                .addFields({ name: 'Players', value: usernames.join('\n') });
+                .addFields({ name: 'Players', value: usernamesArray.join('\n') });
 
             // Update the original response with the new embed and buttons
             await interaction.update({ embeds: [updatedEmbed], components: [buttons] });
