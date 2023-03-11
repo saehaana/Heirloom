@@ -36,7 +36,10 @@ module.exports = {
         collector.on('collect', async i => {
             // Update the embed based on which button was clicked
             if (i.customId === 'join') {
-                usernames.push(i.user.username);
+                // Ensures only unique names are added to the embed
+                if(!usernames.includes(i.user.username)){
+                    usernames.push(i.user.username);
+                }
                 embed.setDescription(`Team 1: \n ${usernames.join('\n')}`);
             } else if (i.customId === 'leave') {
                 // Remove the user's username from the list of joined users
