@@ -31,12 +31,20 @@ module.exports = {
         const filter = i => i.customId === 'join' || i.customId === 'leave';
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 300000 });
 
+        const usernames = [];
+        
         collector.on('collect', async i => {
             // Update the embed based on which button was clicked
             if (i.customId === 'join') {
-                embed.setDescription(`Team 1: \n ${i.user.username}`);
+                usernames.push(i.user.username);
+                embed.setDescription(`Team 1: \n ${usernames.join('\n')}`);
             } else if (i.customId === 'leave') {
-                embed.setDescription(`Team 1:`);
+                // Remove the user's username from the list of joined users
+				const index = usernames.indexOf(i.user.username);
+				if (index !== -1) {
+					usernames.splice(index, 1);
+				}
+                embed.setDescription(`Team 1:\n${usernames.join('\n')}`);
             }
     
             // Edit the original message with the updated embed
