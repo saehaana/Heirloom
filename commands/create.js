@@ -29,37 +29,24 @@ module.exports = {
 
         // Create a message component collector to listen for button clicks
         const filter = i => i.customId === 'join' || i.customId === 'leave';
-        const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
+        const collector = interaction.channel.createMessageComponentCollector({ filter, time: 300000 });
 
-        // Define an array to store the usernames of users who have joined
-        const usernames = new Set([]); 
-
-        // Handle button clicks
-        collector.on('collect', async interaction => {
-            const username = interaction.member.user.username;
-            
-            if(interaction.customId == 'join'){
-                usernames.add(username);
-            }else if(interaction.customId == 'leave'){
-                const index = usernames.indexOf(username);
-                if(index !== -1){
-                    // At position index, remove 1 item
-                    usernames.splice(index,1);
-                }
+        collector.on('collect', async i => {
+            // Update the embed based on which button was clicked
+            if (i.customId === 'join') {
+                embed.setDescription(`Team 1: \n ${i.user.username}`);
+            } else if (i.customId === 'leave') {
+                embed.setDescription(`Team 1:`);
             }
-
-            // Convert set to array
-            const usernamesArray = Array.from(usernames);
-
-            // Create a new embed with the updated list of usernames
-            const updatedEmbed = new EmbedBuilder()
-                .setColor('Blue')
-                .setTitle('Lobby')
-                .setDescription(`Team 1`)
-                .addFields({ name: 'Players', value: usernamesArray.join('\n') });
-
-            // Update the original response with the new embed and buttons
-            await interaction.update({ embeds: [updatedEmbed], components: [buttons] });
+    
+            // Edit the original message with the updated embed
+            await i.update({ embeds: [embed], components: [buttons] });
+        });
+    
+        collector.on('end', async collected => {
+            embed.setTitle('Lobby (Closed)');
+            // Remove the buttons from the original message when the collector ends
+            await interaction.editReply({ embeds: [embed], components: [] });
         });
 	},
-};
+}; 
