@@ -13,8 +13,14 @@ module.exports = {
             //Create embed for each store bundle
             var storeEmbed = new EmbedBuilder()
             .setTitle(`${response.data[bundle].title}`)
-            .setDescription(`${response.data[bundle].pricing[0].quantity} Apex Coins`)
             .setImage(`${response.data[bundle].asset}`);
+
+            // Check if bundle is available for purchase with both Apex coins and Legend tokens and set description accordingly
+            if(`${response.data[bundle].pricing[0].ref}` === 'Legend Tokens'){
+                storeEmbed.setDescription(`${response.data[bundle].pricing[0].quantity} Legend Tokens | ${response.data[bundle].pricing[1].quantity} Apex Coins`);
+            }else{
+                storeEmbed.setDescription(`${response.data[bundle].pricing[0].quantity} Apex Coins`);
+            }
 
             //Get each item in bundle
             for(const item in response.data[bundle].content){
