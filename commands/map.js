@@ -22,9 +22,9 @@ module.exports = {
         // e.g. 18:00 - UTC(-4) = 18:00 + 4:00 = 22:00 | wrong
         //      18:00 - UTC(-4) = 18:00 - 4:00 = 14:00 | correct
         if(offsetInMinutes < 0){
-            formattedTime = timeZone.add(offsetInMinutes, 'minutes').format('MM-DD-YYYY HH:mm:ss');
+            formattedTime = timeZone.add(offsetInMinutes, 'minutes').format('MM-DD-YYYY hh:mm:ss A');
         }else{
-            formattedTime = timeZone.subtract(offsetInMinutes, 'minutes').format('MM-DD-YYYY HH:mm:ss');
+            formattedTime = timeZone.subtract(offsetInMinutes, 'minutes').format('MM-DD-YYYY hh:mm:ss A');
         }
         
 		//EmbedBuilder object that holds maps in rotation for specified game modes
