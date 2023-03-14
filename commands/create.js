@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('test')
+		.setName('create')
 		.setDescription('Let your friends know what game you want to play')
         .addStringOption(option => 
             option.setName('title')
