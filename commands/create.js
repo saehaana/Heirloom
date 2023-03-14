@@ -21,6 +21,18 @@ module.exports = {
         .setColor('Green')
         .setDescription('**Queue**:')
 
+        // Check if 'title' option was provided and add to embed
+        const titleOption = interaction.options.getString('title');
+        if(titleOption !== null){
+            embed.setTitle(titleOption);
+        }
+
+        // 'team-size' optional flag to be used as max size of team
+        const teamSizeOption = interaction.options.getInteger('team-size');
+        if(teamSizeOption !== null){
+            embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
+        }
+
         // Row of buttons that lets users decide if they want to play
         const buttons = new ActionRowBuilder()
         .addComponents(
@@ -42,18 +54,6 @@ module.exports = {
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 3600000 });
 
         collector.on('collect', async i => {   
-            // Check if 'title' option was provided and add to embed
-            const titleOption = interaction.options.getString('title');
-            if(titleOption !== null){
-                embed.setTitle(titleOption);
-            }
-
-            // 'team-size' optional flag to be used as max size of team
-            const teamSizeOption = interaction.options.getInteger('team-size');
-            if(teamSizeOption !== null){
-                embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
-            }
-            
             // Update the embed based on which button was clicked
             if (i.customId === 'join') {
                 // Ensures only unique names are added to the embed
