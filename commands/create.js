@@ -23,8 +23,14 @@ module.exports = {
 
         // Check if 'title' option was provided and add to embed
         const titleOption = interaction.options.getString('title');
-        if(titleOption){
+        if(titleOption !== null){
             embed.setTitle(titleOption);
+        }
+
+        // 'team-size' optional flag to be used as max size of team
+        const teamSizeOption = interaction.options.getInteger('team-size');
+        if(teamSizeOption !== null){
+            embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
         }
 
         // Row of buttons that lets users decide if they want to play
@@ -47,10 +53,7 @@ module.exports = {
         const filter = i => i.customId === 'join' || i.customId === 'leave';
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 3600000 });
 
-        collector.on('collect', async i => {
-            // 'team-size' optional flag to be used as max size of team
-            const teamSizeOption = interaction.options.getInteger('team-size');
-
+        collector.on('collect', async i => {   
             // Update the embed based on which button was clicked
             if (i.customId === 'join') {
                 // Ensures only unique names are added to the embed
@@ -60,7 +63,7 @@ module.exports = {
                 if(teamSizeOption !== null){
                     embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
                 }else{
-                    embed.setDescription(`**Queue**: \n ${usernames.join('\n')}`);
+                    embed.setDescription(`**Queue (${usernames.length})**: \n ${usernames.join('\n')}`);
                 }
             } else if (i.customId === 'leave') {
                 // Remove the user's username from the list of joined users
@@ -71,16 +74,21 @@ module.exports = {
                 if(teamSizeOption !== null){
                     embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
                 }else{
-                    embed.setDescription(`**Queue**: \n ${usernames.join('\n')}`);
+                    embed.setDescription(`**Queue (${usernames.length})**: \n ${usernames.join('\n')}`);
                 }
-            }
+            } 
     
             // Edit the original message with the updated embed
             await i.update({ embeds: [embed], components: [buttons] });
         });
     
         collector.on('end', async collected => {
-            embed.setTitle(`${titleOption} (Closed)`);
+            if(titleOption !== null){
+                embed.setTitle(`${titleOption} (Closed)`);
+            }else{
+                embed.setTitle('(Closed)');
+            }
+
             embed.setColor('Red');
             // Remove the buttons from the original message when the collector ends
             await interaction.editReply({ embeds: [embed], components: [] });
