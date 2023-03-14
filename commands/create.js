@@ -49,7 +49,7 @@ module.exports = {
 
         collector.on('collect', async i => {
             // 'team-size' optional flag to be used as max size of team
-            const teamSizeOption = interaction.options.getString('team-size');
+            const teamSizeOption = interaction.options.getInteger('team-size');
 
             // Update the embed based on which button was clicked
             if(i.customId === 'join'){
