@@ -52,19 +52,27 @@ module.exports = {
             const teamSizeOption = interaction.options.getInteger('team-size');
 
             // Update the embed based on which button was clicked
-            if(i.customId === 'join'){
+            if (i.customId === 'join') {
                 // Ensures only unique names are added to the embed
                 if(!usernames.includes(i.user.username)){
                     usernames.push(i.user.username);
                 }
-                embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
-            }else if(i.customId === 'leave'){
+                if(teamSizeOption !== null){
+                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
+                }else{
+                    embed.setDescription(`**Queue**: \n ${usernames.join('\n')}`);
+                }
+            } else if (i.customId === 'leave') {
                 // Remove the user's username from the list of joined users
 				const index = usernames.indexOf(i.user.username);
-				if(index !== -1){
+				if (index !== -1) {
 					usernames.splice(index, 1);
 				}
-                embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
+                if(teamSizeOption !== null){
+                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
+                }else{
+                    embed.setDescription(`**Queue**: \n ${usernames.join('\n')}`);
+                }
             }
     
             // Edit the original message with the updated embed
