@@ -24,11 +24,11 @@ module.exports = {
         // e.g. 18:00 - UTC(-4) = 18:00 + 4:00 = 22:00 | wrong
         //      18:00 - UTC(-4) = 18:00 - 4:00 = 14:00 | correct
         if(offsetInMinutes < 0){
-            formattedTime = timeZone.add(offsetInMinutes, 'minutes').format('MM-DD hh:mm A');
+            formattedTime = timeZone.add(offsetInMinutes, 'minutes').format('MM/DD hh:mm A');
             console.log(formattedTime);
         }
         if(offsetInMinutes >= 0){
-            formattedTime = timeZone.subtract(offsetInMinutes, 'minutes').format('MM-DD hh:mm A');
+            formattedTime = timeZone.subtract(offsetInMinutes, 'minutes').format('MM/DD hh:mm A');
             console.log(formattedTime);
         }
         
