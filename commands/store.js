@@ -25,6 +25,11 @@ module.exports = {
                 storeEmbed.setDescription(`${response.data[bundle].pricing[0].quantity} Apex Coins`);
             }
 
+            // Get each item in the bundle and display it as a field
+            for(const item in response.data[bundle].content){
+                storeEmbed.addFields({ name: `Item ${item}`, value: `${response.data[bundle].content[item].name}`, inline: true })
+            }
+
             allStoreEmbeds.push(storeEmbed);
         }
         
