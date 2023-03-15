@@ -78,7 +78,13 @@ module.exports = {
 
         // Close the collector and remove buttons from the last viewed embed 
         collector.on('end', async (interaction) => {
-            await initialResponse.editReply({ embeds: [allStoreEmbeds[embedIndex]], components: [] });
+             // Disables all button components
+             buttons.components.forEach((component) => {
+                component.setDisabled(true);
+            });
+
+            await initialResponse.edit({ embeds: [allStoreEmbeds[embedIndex]], components: [] });
+            
             collector.stop();
         })
 
