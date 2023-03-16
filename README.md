@@ -2,6 +2,8 @@
 
 This discord bot provides ease of access to data commonly utilized by Apex Legends users. If you constantly forget or checkup daily on Apex in-game information, adding this bot to your server is a better alternative if you always leave your discord open. Otherwise you can stick to web searches as that will fulfill the same purpose.
 
+# Bot Invitation
+
 # Command List
 
 ## User Commands
@@ -19,3 +21,6 @@ e.g. To use the bot's map command, enter `/map`
 | status     |                    | Checks server status |
 | store      |                    | Get current in game shop bundles along with pricings. Displays both Apex Coins and Legend Tokens if available |
 
+# API
+
+This bot makes use of [Apex Legends Status](https://apexlegendsapi.com/#introduction), a public third party API.   
