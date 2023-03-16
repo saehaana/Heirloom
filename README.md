@@ -19,3 +19,6 @@ e.g. To use the bot's map command, enter `/map`
 | status     |                    | Checks server status |
 | store      |                    | Get current in game shop bundles along with pricings. Displays both Apex Coins and Legend Tokens if available |
 
+# API
+
+This bot makes queries to [Apex Legends Status](https://apexlegendsapi.com/#introduction), a public third party API.   
