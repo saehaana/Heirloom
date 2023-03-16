@@ -2,6 +2,8 @@
 
 This discord bot provides ease of access to data commonly utilized by Apex Legends users. If you constantly forget or checkup daily on Apex in-game information, adding this bot to your server is a better alternative if you always leave your discord open. Otherwise you can stick to web searches as that will fulfill the same purpose.
 
+# Bot Invitation
+
 # Command List
 
 ## User Commands
