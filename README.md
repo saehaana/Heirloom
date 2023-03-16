@@ -21,4 +21,4 @@ e.g. To use the bot's map command, enter `/map`
 
 # API
 
-This bot makes queries to [Apex Legends Status](https://apexlegendsapi.com/#introduction), a public third party API.   
+This bot makes use of [Apex Legends Status](https://apexlegendsapi.com/#introduction), a public third party API.   
