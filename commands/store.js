@@ -88,7 +88,7 @@ module.exports = {
                 component.setDisabled(true);
             });
 
-            await initialResponse.edit({ embeds: [allStoreEmbeds[embedIndex]], components: [] });
+            await initialResponse.edit({ embeds: [allStoreEmbeds[embedIndex]], components: [buttons] });
             
             collector.stop();
         })
