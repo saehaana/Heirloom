@@ -65,16 +65,16 @@ module.exports = {
         if(roleOption && roles.has(roleOption.id)){
             // Send message to users based on command options provided
             if(titleOption){
-                await initialResponse.reply(`LFG ${roleOption} : ${titleOption}`);
+                await initialResponse.channel.send(`LFG ${roleOption} : ${titleOption}`);
             }else{
-                await initialResponse.reply(`LFG ${roleOption}`);
+                await initialResponse.channel.send(`LFG ${roleOption}`);
             }
             
         }
         
         // Create a message component collector to listen for button clicks
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
-        const collector = initialResponse.createMessageComponentCollector({ filter, time: 3600000 });
+        const collector = initialResponse.createMessageComponentCollector({ filter, time: 30000 });
 
         collector.on('collect', async i => {  
             // Update the embed based on which button was clicked
@@ -103,6 +103,25 @@ module.exports = {
      
             // Edit the original message with the updated embed
             await i.update({ embeds: [embed], components: [buttons] });
+
+            // Check if the queue player count has been satisfied
+            if(teamSizeOption){
+                let message = "";
+                if(usernames.length === teamSizeOption){
+                    // Get collection of all members in channel
+                    const mentions = initialResponse.channel.members
+                    // Filter collection to users that stayed in queue
+                    .filter(member => usernames.includes(member.user.username))
+                    // Tag each member with the '@' symbol to mention them by converting member objects to a string
+                    .map(member => member.toString());
+
+                    message = `${mentions.join(', ')}, join voice to start`;
+                    await initialResponse.channel.send(message);
+                    
+                    // Close the queue when filled
+                    collector.stop();
+                }
+            }
 
         });
      
