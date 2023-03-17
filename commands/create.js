@@ -74,7 +74,7 @@ module.exports = {
         
         // Create a message component collector to listen for button clicks
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
-        const collector = initialResponse.createMessageComponentCollector({ filter, time: 30000 });
+        const collector = initialResponse.createMessageComponentCollector({ filter, time: 3600000 });
 
         collector.on('collect', async i => {  
             // Update the embed based on which button was clicked
