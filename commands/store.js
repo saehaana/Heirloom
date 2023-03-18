@@ -26,8 +26,11 @@ module.exports = {
             }
 
             // Get each item in the bundle and display it as a field
-            for(const item in response.data[bundle].content){
-                storeEmbed.addFields({ name: `Item ${item}`, value: `${response.data[bundle].content[item].name}`, inline: true })
+            for(let i = 0; i < response.data[bundle].content.length; i++){
+                // Increment by 1 to start item number label at 1 instead of 0 for embed field
+                let itemNum = i+1;
+
+                storeEmbed.addFields({ name: `Item ${itemNum}`, value: `${response.data[bundle].content[i].name}`, inline: true })
             }
 
             allStoreEmbeds.push(storeEmbed);
