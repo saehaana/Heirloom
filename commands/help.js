@@ -1,10 +1,10 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('help')
-		.setDescription('Use if you need help navigating the bot'),
-	async execute(interaction) {
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Use if you need help navigating the bot'),
+    async execute(interaction) {
         const embed = new EmbedBuilder()
         .setColor('Blue')
         .setTitle('Help')
@@ -17,5 +17,5 @@ module.exports = {
         'Send me a DM at osutin#5152 or use /reportbug')
 
         interaction.reply({ embeds: [embed] });
-	},
+    },
 }; 

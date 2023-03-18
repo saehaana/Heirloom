@@ -35,12 +35,14 @@ module.exports = {
 		//EmbedBuilder object that holds maps in rotation for specified game modes
         let currentMapEmbed = new EmbedBuilder()
         .setTitle('Ranked Map Rotation')
+        .setColor('Blue')
         .addFields
         ({ name: 'Current', value: `${response.data.ranked.current.map}`, inline: true },
         { name: 'Duration', value: `${response.data.ranked.current.remainingTimer}`, inline: true })
 	    .setImage(`${response.data.ranked.current.asset}`);
 
         let nextMapEmbed = new EmbedBuilder()
+        .setColor('Blue')
         .addFields
         ({ name: 'Next', value: `${response.data.ranked.next.map}`, inline: true },
         { name: 'Start', value: `${formattedTime}`, inline: true })

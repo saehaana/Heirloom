@@ -13,6 +13,7 @@ module.exports = {
         //Uses same url to add more images to single embed
         let dailyEmbed1 = new EmbedBuilder()
         .setTitle('Daily Craft Rotation')
+        .setColor('Blue')
         .setDescription(`
         ${ response.data[0].bundleContent[0].itemType.name }
         Cost: ${ response.data[0].bundleContent[0].cost }
@@ -27,6 +28,7 @@ module.exports = {
 
         let weeklyEmbed1 = new EmbedBuilder()
         .setTitle('Weekly Craft Rotation')
+        .setColor('Blue')
         .setDescription(`
         ${ response.data[1].bundleContent[0].itemType.name }
         Cost: ${ response.data[1].bundleContent[0].cost }
