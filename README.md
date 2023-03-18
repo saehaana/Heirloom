@@ -1,6 +1,6 @@
 # Summary
 
-This discord bot provides ease of access to data commonly utilized by Apex Legends users. If you constantly forget or checkup daily on Apex in-game information, adding this bot to your server is a better alternative if you always leave your discord open. Otherwise you can stick to web searches as that will fulfill the same purpose.
+This discord bot provides ease of access to data commonly utilized by Apex Legends users. If you want to check up on Apex in-game information **WITHOUT** launching the game, adding this bot to your server is a better alternative if you always leave your discord open. Otherwise you can stick to web searches or opening the game as that will fulfill the same purpose.
 
 # Bot Invitation
 
@@ -15,7 +15,7 @@ e.g. To use the bot's map command, enter `/map`
 | Command    |Options                 | Description       |
 |------------|------------------------|-------------------|
 | craft      |                        | Get daily and weekly crafting rotations from the replicator |
-| create     | role,title,team-size   | Creates a matchmaking lobby. Click join or leave to queue or dequeue |
+| create     | role,title,team-size   | Creates a matchmaking lobby. Click join or leave to queue or dequeue. When the queue is fulfilled or the role option is used                                             players will receive notifications. |
 | help       |                        | Brings up documentation, support, and report sections
 | map        |                        | View the current and next map along with their durations and start times |
 | patch      |                        | Returns the latest patch notes as a link |
