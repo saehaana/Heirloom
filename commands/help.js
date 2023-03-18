@@ -10,7 +10,7 @@ module.exports = {
         .setTitle('Help')
         .setDescription(
         '**Documentation**\n'+
-        'To view more commands type `/` and click on my icon to the left. Check out the full [Documentation](https://github.com/saehaana/Apex-Bot)\n\n'+
+        'To view more commands type `/` and click on my icon to the left. Check out the full documentation [here](https://github.com/saehaana/Apex-Bot).\n\n'+
         '**Support**\n'+
         'Donations accepted by [Paypal](https://www.paypal.com/donate/?business=LDJMPJV8ER25G&no_recurring=0&item_name=By+donating+you+help+support+the+bot%27s+uptime%21&currency_code=USD)\n\n'+
         '**Report a Bug**\n'+
