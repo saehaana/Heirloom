@@ -16,6 +16,7 @@ e.g. To use the bot's map command, enter `/map`
 |------------|------------------------|-------------------|
 | craft      |                        | Get daily and weekly crafting rotations from the replicator |
 | create     | role,title,team-size   | Creates a matchmaking lobby. Click join or leave to queue or dequeue |
+| help       |                        | Brings up documentation, support, and report sections
 | map        |                        | View the current and next map along with their durations and start times |
 | patch      |                        | Returns the latest patch notes as a link |
 | status     |                        | Checks server status |
