@@ -4,17 +4,17 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('create')
 		.setDescription('Let your friends know what game you want to play')
-        .addRoleOption(option =>
-            option.setName('role')
-            .setDescription('Notify users of the role selected')
-            .setRequired(false))
+        .addIntegerOption(option => 
+            option.setName('team-size')
+            .setDescription('The max number of players allowed')
+            .setRequired(true))
         .addStringOption(option => 
             option.setName('title')
             .setDescription('Set a message you want others to see')
             .setRequired(false))
-        .addIntegerOption(option => 
-            option.setName('team-size')
-            .setDescription('The max number of players allowed')
+        .addRoleOption(option =>
+            option.setName('role')
+            .setDescription('Notify users of the role selected')
             .setRequired(false)),
 	async execute(interaction) {
         const embed = new EmbedBuilder()
