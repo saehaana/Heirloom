@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, Butt
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('create')
+		.setName('heirloom')
 		.setDescription('Keeps track of how close you are to your heirloom')
 		.addBooleanOption(option => 
 			option.setName('setup')
