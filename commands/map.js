@@ -9,13 +9,13 @@ module.exports = {
 		.setDescription('Gets the current and next maps')
 		.addStringOption(option =>
 			option.setName('ranked')
-            .setDescription('Selects the ranked game mode')
+            .setDescription('Select game modes that are ranked')
             .addChoices(
                 { name: 'Battle Royale', value: 'ranked_br' },
             ))
         .addStringOption(option =>
             option.setName('unranked')
-            .setDescription('Selects the unranked game mode')
+            .setDescription('Select game modes that are unranked')
             .addChoices(
                 { name: 'Battle Royale', value: 'unranked_br' },
                 { name: 'LTM', value: 'unranked_ltm' },
@@ -125,17 +125,15 @@ module.exports = {
         } 
 
         if(unrankedOption == 'unranked_ltm'){
-            // Time formattings for current and next ltm
+            // Time formatting for next ltm
 
-            let ltmTime = moment.tz(`${response.data.ltm.current.readableDate_start}`, moment.tz.guess());
-
-            let ltmOffset = ltmTime.utcOffset();
-
-            if(ltmOffset < 0){
-                ltmFormatted = ltmTime.add(ltmOffset, 'minutes').format('hh:mm A');
+            let ltmNextTime = moment.tz(`${response.data.ltm.next.readableDate_start}`, moment.tz.guess());
+            let ltmNextOffset = ltmNextTime.utcOffset();
+            if(ltmNextOffset < 0){
+                ltmNextFormatted = ltmNextTime.add(ltmNextOffset, 'minutes').format('hh:mm A');
             }
-            if(ltmOffset >= 0){
-                ltmFormatted = ltmTime.subtract(ltmOffset, 'minutes').format('hh:mm A');
+            if(ltmNextOffset >= 0){
+                ltmNextFormatted = ltmNextTime.subtract(ltmNextOffset, 'minutes').format('hh:mm A');
             }
 
             // Creates and displays embeds of current and next maps for the specified game mode
@@ -168,9 +166,9 @@ module.exports = {
             const nextLtmEmbed = new EmbedBuilder()
             .setColor('Blue')
             .addFields
-            ({ name: 'Next', value: `${response.data.ltm.next.map} ${response.data.ltm.next.eventName}`, inline: true },
+            ({ name: 'Next', value: `${response.data.ltm.next.map}`, inline: true },
             { name: 'Mode', value: `${response.data.ltm.next.eventName}`, inline: true },
-            { name: 'Start', value: `${ltmFormatted}`, inline: true })
+            { name: 'Start', value: `${ltmNextFormatted}`, inline: true })
             .setImage(`${response.data.ltm.next.asset}`);
 
             allEmbeds.push(nextLtmEmbed);
