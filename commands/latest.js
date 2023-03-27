@@ -29,6 +29,7 @@ module.exports = {
                     // Create embed for latest patch release
                     const patchEmbed = new EmbedBuilder()
                     .setTitle(`${response.data[article].title}`)
+                    .setColor('Blue')
                     .setDescription(`${response.data[article].short_desc}`)
                     .setImage(`${response.data[article].img}`)
                     .setURL(`${response.data[article].link}`);
@@ -42,6 +43,7 @@ module.exports = {
                     // Create embed for latest collection event
                     const collectionEmbed = new EmbedBuilder()
                     .setTitle(`${response.data[article].title}`)
+                    .setColor('Blue')
                     .setDescription(`${response.data[article].short_desc}`)
                     .setImage(`${response.data[article].img}`)
                     .setURL(`${response.data[article].link}`);
