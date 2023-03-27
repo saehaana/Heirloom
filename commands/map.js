@@ -104,10 +104,22 @@ module.exports = {
             const currentUnrankedBrEmbed = new EmbedBuilder()
             .setTitle('Unranked Map Rotation')
             .setColor('Blue')
-            .addFields
-            ({ name: 'Current', value: `${response.data.battle_royale.current.map}`, inline: true },
-            { name: 'Duration', value: `${response.data.battle_royale.current.remainingMins} minute(s)`, inline: true })
             .setImage(`${response.data.battle_royale.current.asset}`);
+
+            // Change the format of the duration timer depending on case
+            if(`${response.data.battle_royale.current.remainingMins}` > 1){
+                currentUnrankedBrEmbed.addFields
+                ({ name: 'Current', value: `${response.data.battle_royale.current.map}`, inline: true },
+                { name: 'Duration', value: `${response.data.battle_royale.current.remainingMins} minutes`, inline: true })
+            }else if(`${response.data.battle_royale.current.remainingMins}` == 1){
+                currentUnrankedBrEmbed.addFields
+                ({ name: 'Current', value: `${response.data.battle_royale.current.map}`, inline: true },
+                { name: 'Duration', value: `${response.data.battle_royale.current.remainingMins} minute`, inline: true })
+            }else if(`${response.data.battle_royale.current.remainingMins}` < 1){
+                currentUnrankedBrEmbed.addFields
+                ({ name: 'Current', value: `${response.data.battle_royale.current.map}`, inline: true },
+                { name: 'Duration', value: `${response.data.battle_royale.current.remainingSecs} seconds`, inline: true })
+            }
 
             allEmbeds.push(currentUnrankedBrEmbed);
             
