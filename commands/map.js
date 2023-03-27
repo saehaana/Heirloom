@@ -12,24 +12,19 @@ module.exports = {
             .setDescription('Selects the ranked game mode')
             .addChoices(
                 { name: 'Battle Royale', value: 'ranked_br' },
-                { name: 'Arenas', value: 'ranked_arena' },
             ))
         .addStringOption(option =>
             option.setName('unranked')
             .setDescription('Selects the unranked game mode')
             .addChoices(
                 { name: 'Battle Royale', value: 'unranked_br' },
-                { name: 'Arenas', value: 'unranked_arena' },
-            ))
-        .addStringOption(option =>
-            option.setName('ltm')
-            .setDescription('Selects the ltm game mode')),
+                { name: 'LTM', value: 'unranked_ltm' },
+            )),
 	async execute(interaction) {
         let response = await axios.get(`https://api.mozambiquehe.re/maprotation?version=2&auth=${apexToken}`);
 
         const rankedOption = interaction.options.getString('ranked');
         const unrankedOption = interaction.options.getString('unranked');
-        const ltmOption = interaction.options.getString('ltm');
 
         let allEmbeds = [];
 
@@ -81,22 +76,18 @@ module.exports = {
         } 
 
         // Check if the unranked option was selected
-        if(unrankedOption){
+        if(unrankedOption == 'unranked_br'){
             // Time formatting for unranked battle royale
 
             let unrankedTime = moment.tz(`${response.data.battle_royale.next.readableDate_start}`, moment.tz.guess());
-            console.log(unrankedTime);
 
             let unrankedOffset = unrankedTime.utcOffset();
-            console.log(unrankedOffset);
 
             if(unrankedOffset < 0){
                 unrankedFormatted = unrankedTime.add(unrankedOffset, 'minutes').format('hh:mm A');
-                console.log(unrankedFormatted);
             }
             if(unrankedOffset >= 0){
                 unrankedFormatted = unrankedTime.subtract(unrankedOffset, 'minutes').format('hh:mm A');
-                console.log(unrankedFormatted);
             }
 
             // Creates and displays embeds of current and next maps for the specified game mode
@@ -132,6 +123,58 @@ module.exports = {
 
             allEmbeds.push(nextUnrankedBrEmbed);
         } 
+
+        if(unrankedOption == 'unranked_ltm'){
+            // Time formattings for current and next ltm
+
+            let ltmTime = moment.tz(`${response.data.ltm.current.readableDate_start}`, moment.tz.guess());
+
+            let ltmOffset = ltmTime.utcOffset();
+
+            if(ltmOffset < 0){
+                ltmFormatted = ltmTime.add(ltmOffset, 'minutes').format('hh:mm A');
+            }
+            if(ltmOffset >= 0){
+                ltmFormatted = ltmTime.subtract(ltmOffset, 'minutes').format('hh:mm A');
+            }
+
+            // Creates and displays embeds of current and next maps for the specified game mode
+
+            const currentLtmEmbed = new EmbedBuilder()
+            .setTitle('LTM Map Rotation')
+            .setColor('Blue')
+            .setImage(`${response.data.ltm.current.asset}`);
+
+            // Change the format of the duration timer depending on case
+            if(`${response.data.ltm.current.remainingMins}` > 1){
+                currentLtmEmbed.addFields
+                ({ name: 'Current', value: `${response.data.ltm.current.map}`, inline: true },
+                { name: 'Mode', value: `${response.data.ltm.current.eventName}`, inline: true },
+                { name: 'Duration', value: `${response.data.ltm.current.remainingMins} minutes`, inline: true })
+            }else if(`${response.data.ltm.current.remainingMins}` == 1){
+                currentLtmEmbed.addFields
+                ({ name: 'Current', value: `${response.data.ltm.current.map}`, inline: true },
+                { name: 'Mode', value: `${response.data.ltm.current.eventName}`, inline: true },
+                { name: 'Duration', value: `${response.data.ltm.current.remainingMins} minute`, inline: true })
+            }else if(`${response.data.battle_royale.current.remainingMins}` < 1){
+                currentLtmEmbed.addFields
+                ({ name: 'Current', value: `${response.data.ltm.current.map}`, inline: true },
+                { name: 'Mode', value: `${response.data.ltm.current.eventName}`, inline: true },
+                { name: 'Duration', value: `${response.data.ltm.current.remainingSecs} seconds`, inline: true })
+            }
+
+            allEmbeds.push(currentLtmEmbed);
+            
+            const nextLtmEmbed = new EmbedBuilder()
+            .setColor('Blue')
+            .addFields
+            ({ name: 'Next', value: `${response.data.ltm.next.map} ${response.data.ltm.next.eventName}`, inline: true },
+            { name: 'Mode', value: `${response.data.ltm.next.eventName}`, inline: true },
+            { name: 'Start', value: `${ltmFormatted}`, inline: true })
+            .setImage(`${response.data.ltm.next.asset}`);
+
+            allEmbeds.push(nextLtmEmbed);
+        }
 
         await interaction.reply({ embeds: allEmbeds });
 	},
