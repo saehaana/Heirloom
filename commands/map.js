@@ -149,12 +149,7 @@ module.exports = {
                 ({ name: 'Current', value: `${response.data.ltm.current.map}`, inline: true },
                 { name: 'Mode', value: `${response.data.ltm.current.eventName}`, inline: true },
                 { name: 'Duration', value: `${response.data.ltm.current.remainingMins} minutes`, inline: true })
-            }else if(`${response.data.ltm.current.remainingMins}` == 1){
-                currentLtmEmbed.addFields
-                ({ name: 'Current', value: `${response.data.ltm.current.map}`, inline: true },
-                { name: 'Mode', value: `${response.data.ltm.current.eventName}`, inline: true },
-                { name: 'Duration', value: `${response.data.ltm.current.remainingMins} minute`, inline: true })
-            }else if(`${response.data.battle_royale.current.remainingMins}` < 1){
+            }else if(`${response.data.ltm.current.remainingMins}` <= 1){
                 currentLtmEmbed.addFields
                 ({ name: 'Current', value: `${response.data.ltm.current.map}`, inline: true },
                 { name: 'Mode', value: `${response.data.ltm.current.eventName}`, inline: true },
