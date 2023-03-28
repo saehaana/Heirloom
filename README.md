@@ -3,6 +3,7 @@
 This discord bot provides ease of access to data commonly utilized by Apex Legends users. If you want to check up on Apex in-game information **WITHOUT** launching the game, adding this bot to your server is a better alternative if you always leave your discord open. Otherwise you can stick to web searches or opening the game as that will fulfill the same purpose.
 
 # Bot Invitation
+Will be available for server invite on top.gg once enough features have been added.
 
 # Command List
 
