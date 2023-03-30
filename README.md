@@ -11,9 +11,7 @@ Will be available for server invite on top.gg once enough features have been add
 
 By default all user commands are prefixed with the `/` character.  
 
-e.g. To use the bot's map command, enter `/map`. Below is a visual of the command's usage.
-
-![](ezgif.com-video-to-gif.gif)
+e.g. To use the bot's map command, enter `/map`.
 
 | Command    | Options/Subcommands    | Description       |
 |------------|------------------------|-------------------|
