@@ -74,7 +74,7 @@ module.exports = {
         
         // Create a message component collector to listen for button clicks
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
-        const collector = initialResponse.createMessageComponentCollector({ filter, time: 7200000 });
+        const collector = initialResponse.createMessageComponentCollector({ filter, time: 14400000 });
         let message = "";
 
         collector.on('collect', async i => {  
