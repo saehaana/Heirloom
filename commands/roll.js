@@ -17,12 +17,11 @@ module.exports = {
         // Generate random number for dice roll
         // Default roll range will be between 0 and 100 unless specified by optional command
         if(flagMax !== null){ 
-            roll = Math.floor(Math.random() * flagMax) + 1; // +1 to include highest number
+            roll = Math.floor(Math.random() * flagMax) + 1; // +1 to include highest number and exclude 0
+            interaction.reply(user + " rolls " + roll + ` (1-${flagMax})`);
         }else{
             roll = Math.floor(Math.random() * 100) + 1; 
+            interaction.reply(user + " rolls " + roll + " (1-100)");
         }
-        
-        // Print user and generated number
-        interaction.reply(user + " rolled " + roll);
 	},
-};  
+};   
