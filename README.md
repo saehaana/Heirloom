@@ -18,10 +18,11 @@ e.g. To use the bot's map command, enter `/map`.
 | craft      | daily,weekly           | Get daily and weekly crafting rotations from the replicator |
 | create     | role,title,team-size   | Creates a matchmaking lobby. Click join or leave to queue or dequeue. When the queue is fulfilled or the role option is used                                             players will receive notifications. |
 | heirloom   | setup,edit,count       | Track your total Apex packs collected from past events |
-| help       |                        | Brings up documentation, support, and report sections
-| map        | ranked,unranked        | View the current and next map along with their durations and start times |
+| help       |                        | Brings up documentation, support, and report sections |
 | latest     | patch,collection-event | Returns the latest patch notes and collection events as clickable links |
-| status     |                        | Checks server status |
+| map        | ranked,unranked        | View the current and next map along with their durations and start times |
+| roll       | max                    | Random number generator. Adding a number in the max option will set a roll range from 0 to max's value exclusively |
+| status     |                        | Checks online status of various Apex related services |
 | store      |                        | Get current in game shop bundles along with pricings. Displays both Apex Coins and Legend Tokens if available |
 
 # API
