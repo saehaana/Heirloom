@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 
 const userTimes = {}; // User availability times
 const userStatus = {}; // User availability status
+const globalUsernames = {}; // Separate usernames for each interaction
 
 const yesButton = new ButtonBuilder()
     .setCustomId('yes')
@@ -21,10 +22,6 @@ module.exports = {
             option.setName('team-size')
             .setDescription('The max number of players allowed')
             .setRequired(true))
-        .addStringOption(option => 
-            option.setName('title')
-            .setDescription('Set a message you want others to see')
-            .setRequired(false))
         .addRoleOption(option =>
             option.setName('role')
             .setDescription('Notify users of the role selected')
@@ -38,7 +35,7 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setColor('Green')
             .setDescription('**Queue**:');
-        
+
         const buttons = new ActionRowBuilder()
             .addComponents( 
                 new ButtonBuilder()
@@ -51,7 +48,9 @@ module.exports = {
                     .setStyle(ButtonStyle.Danger)
             );
 
-        let usernames = [];
+        const usernames = [];
+        globalUsernames[interaction.id] = usernames;
+
         const titleOption = interaction.options.getString('title');
         const teamSizeOption = interaction.options.getInteger('team-size');
         const timeOption = interaction.options.getString('time');
@@ -83,7 +82,7 @@ module.exports = {
 
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
         const collector = initialResponse.createMessageComponentCollector({ filter, time: 14400000 });
-        
+
         collector.on('collect', async i => {  
             if (i.customId === 'join') {
                 if(!usernames.includes(i.user.username)) {
@@ -112,7 +111,7 @@ module.exports = {
             } 
 
             await i.update({ embeds: [embed], components: [buttons] });
-            
+
             if(usernames.length === teamSizeOption) {
                 const mentions = interaction.channel.members
                     .filter(member => usernames.includes(member.user.username))
@@ -127,8 +126,20 @@ module.exports = {
         collector.on('end', async collected => {
             embed.setTitle('(Closed)').setColor('Red');
             await initialResponse.edit({ embeds: [embed], components: [] });
-        });
 
+            // Clear the userTimes, userStatus for users in this queue
+            globalUsernames[interaction.id].forEach(username => {
+                const pureName = username.split(' ')[0];
+                const user = interaction.channel.members.find(member => member.user.username === pureName);
+                if (user) {
+                    delete userTimes[user.id];
+                    delete userStatus[user.id];
+                }
+            });
+
+            // Clear the usernames for this queue
+            delete globalUsernames[interaction.id];
+        });
     }
 };
 
@@ -152,14 +163,14 @@ setInterval(async () => {
                         if (index !== -1) {
                             usernames[index] = user.username + ' (Ready)';
                         }
-                        await i.update({ content: "You're marked as ready!", components: [] });
+                        await i.update({ content: "You're marked as ready!" });
                     } else if (i.customId === 'no') {
                         const index = usernames.indexOf(user.username + ' (Pending)');
                         if (index !== -1) {
                             usernames.splice(index, 1);
                         }
                         delete userTimes[userId];
-                        await i.update({ content: "You've been removed from the queue.", components: [] });
+                        await i.update({ content: "You've been removed from the queue." });
                     }
                 });
             }).catch(error => {
