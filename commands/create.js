@@ -1,50 +1,106 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, MessageActionRow, MessageButton } = require('discord.js');
 
-const userTimes = {}; 
-const userStatus = {}; 
-const globalUsernames = {}; 
+const userTimes = {};
+const globalUsernames = {};
 
-const yesButton = new ButtonBuilder()
+const yesButton = new MessageButton()
     .setCustomId('yes')
     .setLabel('Yes')
-    .setStyle(ButtonStyle.Success);
+    .setStyle('SUCCESS');
 
-const noButton = new ButtonBuilder()
+const noButton = new MessageButton()
     .setCustomId('no')
     .setLabel('No')
-    .setStyle(ButtonStyle.Danger);
+    .setStyle('DANGER');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('create')
         .setDescription('Let your friends know what game you want to play')
-        .addIntegerOption(option => 
-            option.setName('team-size')
-            .setDescription('The max number of players allowed')
-            .setRequired(true))
-        .addRoleOption(option =>
-            option.setName('role')
-            .setDescription('Notify users of the role selected')
-            .setRequired(false))
-        .addStringOption(option =>
-            option.setName('time')
-            .setDescription('Time you are available (HH:MM AM/PM)')
-            .setRequired(true)),
+        .addIntegerOption(option => option.setName('team-size').setDescription('The max number of players allowed').setRequired(true))
+        .addRoleOption(option => option.setName('role').setDescription('Notify users of the role selected').setRequired(false))
+        .addStringOption(option => option.setName('time').setDescription('Time you are available (HH:MM AM/PM)').setRequired(false)),
 
     async execute(interaction) {
-        // ... [rest of the code remains unchanged]
+        const embed = {
+            color: 'GREEN',
+            description: '**Queue**:',
+        };
 
-        collector.on('end', async collected => {
-            embed.setTitle('(Closed)').setColor('Red');
-            await initialResponse.edit({ embeds: [embed], components: [] });
+        const buttons = new MessageActionRow()
+            .addComponents(new MessageButton().setCustomId('join').setLabel('Join').setStyle('SUCCESS'), new MessageButton().setCustomId('leave').setLabel('Leave').setStyle('DANGER'));
+
+        const usernames = [];
+        globalUsernames[interaction.id] = usernames;
+
+        const titleOption = interaction.options.getString('title');
+        const teamSizeOption = interaction.options.getInteger('team-size');
+
+        if (titleOption) {
+            embed.title = titleOption;
+        }
+
+        embed.description += `**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`;
+
+        await interaction.deferReply();
+        const initialResponse = await interaction.editReply({ embeds: [embed], components: [buttons] });
+
+        const guild = interaction.guild;
+        const roleOption = interaction.options.getRole('role');
+        if (roleOption) {
+            if (titleOption) {
+                await interaction.channel.send(`LFG ${roleOption} : ${titleOption}`);
+            } else {
+                await interaction.channel.send(`LFG ${roleOption}`);
+            }
+        }
+
+        const filter = i => ['join', 'leave'].includes(i.customId);
+        const collector = initialResponse.createMessageComponentCollector({ filter, time: 14400000 });
+
+        collector.on('collect', async i => {
+            if (i.customId === 'join') {
+                if (!usernames.includes(i.user.username)) {
+                    usernames.push(i.user.username);
+                    await i.user.send("What time will you be ready? (HH:MM AM/PM)").then(dmMessage => {
+                        const msgCollector = dmMessage.channel.createMessageCollector({ time: 60000 });
+                        msgCollector.on('collect', msg => {
+                            userTimes[i.user.id] = msg.content;
+                            usernames[usernames.indexOf(i.user.username)] = `${i.user.username} (${msg.content})`;
+                            msgCollector.stop();
+                        });
+                    });
+                }
+            } else if (i.customId === 'leave') {
+                const index = usernames.indexOf(i.user.username);
+                if (index !== -1) {
+                    usernames.splice(index, 1);
+                }
+            }
+
+            embed.description = `**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`;
+            await i.update({ embeds: [embed], components: [buttons] });
+
+            if (usernames.length === teamSizeOption) {
+                const mentions = interaction.channel.members.filter(member => usernames.includes(member.user.username)).map(member => member.toString());
+                const message = `${mentions.join(', ')}, join voice to start`;
+                await interaction.channel.send(message);
+                collector.stop();
+            }
+        });
+
+        collector.on('end', collected => {
+            embed.title = '(Closed)';
+            embed.color = 'RED';
+            initialResponse.edit({ embeds: [embed], components: [] });
+
             globalUsernames[interaction.id].forEach(username => {
-                const pureName = username.split(' ')[0];
-                const user = interaction.channel.members.find(member => member.user.username === pureName);
+                const user = interaction.channel.members.find(member => member.user.username === username);
                 if (user) {
                     delete userTimes[user.id];
-                    delete userStatus[user.id];
                 }
             });
+
             delete globalUsernames[interaction.id];
         });
     }
@@ -53,44 +109,39 @@ module.exports = {
 setInterval(async () => {
     const currentTime = new Date();
     for (const [userId, userTime] of Object.entries(userTimes)) {
-        const chosenTime = new Date(`1970-01-01 ${userTime}`);
+        const [hour, minute, period] = userTime.split(/[:\s]/);
+        const chosenTime = new Date();
+        chosenTime.setHours(period === "PM" ? parseInt(hour) + 12 : hour);
+        chosenTime.setMinutes(minute);
         const timeDifference = Math.abs(currentTime - chosenTime);
+
         if (timeDifference <= 60000) {
-            const user = await interaction.client.users.fetch(userId);
-            user.send("Are you ready to play?", { components: [new ActionRowBuilder().addComponents(yesButton, noButton)] })
-            .then(dmMessage => {
-                const buttonFilter = (i) => i.user.id === userId;
-                const buttonCollector = dmMessage.createMessageComponentCollector({ filter: buttonFilter, time: 90000 });
+            const user = await client.users.fetch(userId);
+            user.send("Are you ready to play?", { components: [new MessageActionRow().addComponents(yesButton, noButton)] }).then(dmMessage => {
+                const buttonCollector = dmMessage.createMessageComponentCollector({ time: 90000 });
+
                 buttonCollector.on('collect', async i => {
                     if (i.customId === 'yes') {
-                        userStatus[userId] = 'Ready';
-                        const index = usernames.indexOf(user.username + ` (${timeOption})`);
-                        if (index !== -1) {
-                            usernames[index] = user.username + ' (Ready)';
-                        }
-                        await i.update({ content: "You're marked as ready!" });
+                        usernames[usernames.indexOf(user.username)] = `${user.username} (Ready)`;
                     } else if (i.customId === 'no') {
-                        const index = usernames.indexOf(user.username + ` (${timeOption})`);
+                        const index = usernames.indexOf(user.username);
                         if (index !== -1) {
                             usernames.splice(index, 1);
                         }
                         delete userTimes[userId];
-                        await i.update({ content: "You've been removed from the queue." });
                     }
+                    buttonCollector.stop();
                 });
 
                 buttonCollector.on('end', collected => {
                     if (!collected.size) {
-                        const index = usernames.indexOf(user.username + ` (${timeOption})`);
+                        const index = usernames.indexOf(user.username);
                         if (index !== -1) {
                             usernames.splice(index, 1);
                         }
                         delete userTimes[userId];
-                        user.send("You've been automatically removed from the queue due to inactivity.");
                     }
                 });
-            }).catch(error => {
-                console.error('Could not send DM to user:', error);
             });
         }
     }
