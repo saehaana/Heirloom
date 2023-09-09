@@ -1,68 +1,79 @@
-const { Client, Intents, SlashCommandBuilder, MessageActionRow, MessageButton } = require('discord.js');
-
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_CONTENT] });
+const { Client, Intents, SlashCommandBuilder, MessageComponentTypes } = require('discord.js');
 
 const userTimes = {};
 const globalUsernames = {};
 
-const yesButton = new MessageButton().setCustomId('yes').setLabel('Yes').setStyle('SUCCESS');
-const noButton = new MessageButton().setCustomId('no').setLabel('No').setStyle('DANGER');
-const readyButton = new MessageButton().setCustomId('ready').setLabel('Ready').setStyle('PRIMARY');
-const notReadyButton = new MessageButton().setCustomId('notReady').setLabel('Not Ready').setStyle('SECONDARY');
+const yesButton = MessageComponentTypes.BUTTON.create().setCustomId('yes').setLabel('Yes').setStyle('SUCCESS');
+const noButton = MessageComponentTypes.BUTTON.create().setCustomId('no').setLabel('No').setStyle('DANGER');
+const readyButton = MessageComponentTypes.BUTTON.create().setCustomId('ready').setLabel('Ready').setStyle('PRIMARY');
+const notReadyButton = MessageComponentTypes.BUTTON.create().setCustomId('notReady').setLabel('Not Ready').setStyle('SECONDARY');
+const buttons = MessageComponentTypes.ACTION_ROW.create().addComponents(yesButton, noButton, readyButton, notReadyButton);
 
 module.exports = {
-    data: new SlashCommandBuilder().setName('create').setDescription('Let your friends know what game you want to play').addIntegerOption(option => option.setName('team-size').setDescription('The max number of players allowed').setRequired(true)).addRoleOption(option => option.setName('role').setDescription('Notify users of the role selected').setRequired(false)),
+    data: new SlashCommandBuilder()
+        .setName('create')
+        .setDescription('Let your friends know what game you want to play')
+        .addIntegerOption(option => option.setName('team-size').setDescription('The max number of players allowed').setRequired(true))
+        .addRoleOption(option => option.setName('role').setDescription('Notify users of the role selected').setRequired(false)),
 
     async execute(interaction) {
-        const embed = { color: 'GREEN', description: '**Queue**:' };
-        const buttons = new MessageActionRow().addComponents(
-            new MessageButton().setCustomId('join').setLabel('Join').setStyle('SUCCESS'), 
-            new MessageButton().setCustomId('leave').setLabel('Leave').setStyle('DANGER'),
-            readyButton,
-            notReadyButton
-        );
+        const embed = {
+            color: 'GREEN',
+            description: '**Queue**:',
+        };
 
         const usernames = [];
         globalUsernames[interaction.id] = usernames;
+
         const teamSizeOption = interaction.options.getInteger('team-size');
 
         embed.description += `**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`;
+
         await interaction.deferReply();
         const initialResponse = await interaction.editReply({ embeds: [embed], components: [buttons] });
 
+        const guild = interaction.guild;
         const roleOption = interaction.options.getRole('role');
-        if (roleOption) await interaction.channel.send(`LFG ${roleOption}`);
+        if (roleOption) {
+            await interaction.channel.send(`LFG ${roleOption}`);
+        }
 
         const filter = i => ['join', 'leave', 'ready', 'notReady'].includes(i.customId);
         const collector = initialResponse.createMessageComponentCollector({ filter, time: 14400000 });
 
         collector.on('collect', async i => {
-            const userIndex = usernames.indexOf(i.user.username);
-            switch (i.customId) {
-                case 'join':
-                    if (userIndex === -1) {
-                        usernames.push(i.user.username);
-                    }
-                    break;
-                case 'leave':
-                    if (userIndex !== -1) {
-                        usernames.splice(userIndex, 1);
-                    }
-                    break;
-                case 'ready':
-                    if (userIndex !== -1) {
-                        usernames[userIndex] = `${i.user.username} ✅`;
-                    }
-                    break;
-                case 'notReady':
-                    if (userIndex !== -1) {
-                        usernames[userIndex] = `${i.user.username} ❌`;
-                    }
-                    break;
+            if (i.customId === 'join') {
+                if (!usernames.includes(i.user.username)) {
+                    usernames.push(i.user.username);
+                    await i.user.send("What time will you be ready? (HH:MM AM/PM)").then(dmMessage => {
+                        const msgCollector = dmMessage.channel.createMessageCollector({ time: 60000 });
+                        msgCollector.on('collect', msg => {
+                            userTimes[i.user.id] = msg.content;
+                            usernames[usernames.indexOf(i.user.username)] = `${i.user.username} (${msg.content})`;
+                            msgCollector.stop();
+                        });
+                    });
+                }
+            } else if (i.customId === 'leave') {
+                const index = usernames.indexOf(i.user.username);
+                if (index !== -1) {
+                    usernames.splice(index, 1);
+                }
+            } else if (i.customId === 'ready') {
+                const index = usernames.indexOf(i.user.username);
+                if (index !== -1) {
+                    usernames[index] = `${i.user.username} ✅`;
+                }
+            } else if (i.customId === 'notReady') {
+                const index = usernames.indexOf(`${i.user.username} ✅`);
+                if (index !== -1) {
+                    usernames[index] = i.user.username;
+                }
             }
 
             embed.description = `**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`;
             await i.update({ embeds: [embed], components: [buttons] });
+
             if (usernames.length === teamSizeOption) {
                 const mentions = interaction.channel.members.filter(member => usernames.includes(member.user.username)).map(member => member.toString());
                 const message = `${mentions.join(', ')}, join voice to start`;
@@ -71,21 +82,22 @@ module.exports = {
             }
         });
 
-        collector.on('end', () => {
+        collector.on('end', collected => {
             embed.title = '(Closed)';
             embed.color = 'RED';
             initialResponse.edit({ embeds: [embed], components: [] });
 
             globalUsernames[interaction.id].forEach(username => {
-                const user = interaction.channel.members.find(member => member.user.username === username.split(' ')[0]);  // split to remove emoji
-                if (user) delete userTimes[user.id];
+                const user = interaction.channel.members.find(member => member.user.username === username);
+                if (user) {
+                    delete userTimes[user.id];
+                }
             });
 
             delete globalUsernames[interaction.id];
         });
     }
 };
-
 
 setInterval(async () => {
     const currentTime = new Date();
@@ -98,7 +110,7 @@ setInterval(async () => {
 
         if (timeDifference <= 60000) {
             const user = await client.users.fetch(userId);
-            user.send("Are you ready to play?", { components: [new MessageActionRow().addComponents(yesButton, noButton)] }).then(dmMessage => {
+            user.send("Are you ready to play?", { components: [new MessageComponentTypes.ACTION_ROW.create().addComponents(yesButton, noButton)] }).then(dmMessage => {
                 const buttonCollector = dmMessage.createMessageComponentCollector({ time: 90000 });
 
                 buttonCollector.on('collect', async i => {
