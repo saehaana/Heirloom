@@ -1,9 +1,22 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
+const userTimes = {}; // User availability times
+const userStatus = {}; // User availability status
+
+const yesButton = new ButtonBuilder()
+    .setCustomId('yes')
+    .setLabel('Yes')
+    .setStyle(ButtonStyle.Success);
+
+const noButton = new ButtonBuilder()
+    .setCustomId('no')
+    .setLabel('No')
+    .setStyle(ButtonStyle.Danger);
+
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('create')
-		.setDescription('Let your friends know what game you want to play')
+    data: new SlashCommandBuilder()
+        .setName('create')
+        .setDescription('Let your friends know what game you want to play')
         .addIntegerOption(option => 
             option.setName('team-size')
             .setDescription('The max number of players allowed')
@@ -15,126 +28,143 @@ module.exports = {
         .addRoleOption(option =>
             option.setName('role')
             .setDescription('Notify users of the role selected')
-            .setRequired(false)),
-	async execute(interaction) {
+            .setRequired(false))
+        .addStringOption(option =>
+            option.setName('time')
+            .setDescription('Time you are available (HH:MM AM/PM)')
+            .setRequired(true)),
+
+    async execute(interaction) {
         const embed = new EmbedBuilder()
             .setColor('Green')
-            .setDescription('**Queue**:')
-
-        // Row of buttons that lets users decide if they want to play
+            .setDescription('**Queue**:');
+        
         const buttons = new ActionRowBuilder()
-        .addComponents( 
-            new ButtonBuilder()
-                .setCustomId('join')
-                .setLabel(`Join`)
-                .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-                .setCustomId('leave')
-                .setLabel(`Leave`)
-                .setStyle(ButtonStyle.Danger)
-        );
+            .addComponents( 
+                new ButtonBuilder()
+                    .setCustomId('join')
+                    .setLabel('Join')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('leave')
+                    .setLabel('Leave')
+                    .setStyle(ButtonStyle.Danger)
+            );
 
         let usernames = [];
         const titleOption = interaction.options.getString('title');
         const teamSizeOption = interaction.options.getInteger('team-size');
+        const timeOption = interaction.options.getString('time');
 
-        // Check if 'title' option was provided and add to embed
-        if(titleOption !== null){
+        if(titleOption !== null) {
             embed.setTitle(titleOption);
         }
 
-        // 'team-size' optional flag to be used as max size of team for embed 
-        if(teamSizeOption !== null){
+        if(teamSizeOption !== null) {
             embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`); 
-        }else {
+        } else {
             embed.setDescription(`**Queue (${usernames.length})**: \n ${usernames.join('\n')}`);
         }
 
-		await interaction.deferReply();
-        // Send the initial response with the embed and buttons
-        const initialResponse = await interaction.editReply({ embeds: [embed], components: [buttons] }); 
+        await interaction.deferReply();
+        const initialResponse = await interaction.editReply({ embeds: [embed], components: [buttons] });
 
-        // Get the guild object
         const guild = interaction.guild;
-        // Get the list of roles in a guild
         const roles = guild.roles.cache;
-        // Get the command option
         const roleOption = interaction.options.getRole('role');
 
-        // Check if 'role' option provided, check if role exists in the guild
-        if(roleOption && roles.has(roleOption.id)){
-            // Send message to users based on command options provided
-            if(titleOption){
+        if(roleOption && roles.has(roleOption.id)) {
+            if(titleOption) {
                 await interaction.channel.send(`LFG ${roleOption} : ${titleOption}`);
-            }else{
+            } else {
                 await interaction.channel.send(`LFG ${roleOption}`);
             }
-            
         }
-        
-        // Create a message component collector to listen for button clicks
+
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
         const collector = initialResponse.createMessageComponentCollector({ filter, time: 14400000 });
-        let message = "";
-
+        
         collector.on('collect', async i => {  
-            // Update the embed based on which button was clicked
             if (i.customId === 'join') {
-                // Ensures only unique names are added to the embed
-                if(!usernames.includes(i.user.username)){
-                    usernames.push(i.user.username);
-                } 
-                if(teamSizeOption !== null){
-                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);                
-                }else{
+                if(!usernames.includes(i.user.username)) {
+                    usernames.push(i.user.username + ' (Pending)');
+                    userTimes[i.user.id] = timeOption;
+                    userStatus[i.user.id] = 'Pending';
+                }
+
+                if(teamSizeOption !== null) {
+                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
+                } else {
                     embed.setDescription(`**Queue (${usernames.length})**: \n ${usernames.join('\n')}`);
                 }
+
             } else if (i.customId === 'leave') {
-                // Remove the user's username from the list of joined users
-				const index = usernames.indexOf(i.user.username);
-				if (index !== -1) {
-					usernames.splice(index, 1);
-				}   
-                if(teamSizeOption !== null){
-                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);                
-                }else{
+                const index = usernames.indexOf(i.user.username + ' (Pending)');
+                if (index !== -1) {
+                    usernames.splice(index, 1);
+                }
+
+                if(teamSizeOption !== null) {
+                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
+                } else {
                     embed.setDescription(`**Queue (${usernames.length})**: \n ${usernames.join('\n')}`);
                 }
             } 
-     
-            // Edit the original message with the updated embed
+
             await i.update({ embeds: [embed], components: [buttons] });
+            
+            if(usernames.length === teamSizeOption) {
+                const mentions = interaction.channel.members
+                    .filter(member => usernames.includes(member.user.username))
+                    .map(member => member.toString());
 
-            // Check if the queue player count has been satisfied
-			if(usernames.length === teamSizeOption){
-				// Get collection of all members in channel
-				const mentions = interaction.channel.members
-				// Filter collection to users that stayed in queue
-				.filter(member => usernames.includes(member.user.username))
-				// Tag each member with the '@' symbol to mention them by converting member objects to a string
-				.map(member => member.toString());
-
-				message = `${mentions.join(', ')}, join voice to start`;
-				await interaction.channel.send(message);
-				
-				// Close the queue when filled
-				collector.stop();
-			}
-			
-        });
-     
-        collector.on('end', async collected => {
-            if(titleOption !== null){
-                embed.setTitle(`${titleOption} (Closed)`);
-            }else{
-                embed.setTitle('(Closed)');
+                const message = `${mentions.join(', ')}, join voice to start`;
+                await interaction.channel.send(message);
+                collector.stop();
             }
-            embed.setColor('Red');
-
-            // Remove the buttons from the original message when the collector ends
-            await initialResponse.edit({ embeds: [embed], components: [] });
-
-            collector.stop();
         });
-	},
-};  
+
+        collector.on('end', async collected => {
+            embed.setTitle('(Closed)').setColor('Red');
+            await initialResponse.edit({ embeds: [embed], components: [] });
+        });
+
+    }
+};
+
+setInterval(async () => {
+    const currentTime = new Date();
+    for (const [userId, userTime] of Object.entries(userTimes)) {
+        const chosenTime = new Date(`1970-01-01 ${userTime}`);
+        const timeDifference = Math.abs(currentTime - chosenTime);
+
+        if (timeDifference <= 60000) {
+            const user = await interaction.client.users.fetch(userId);
+            user.send("Are you ready to play?", { components: [new ActionRowBuilder().addComponents(yesButton, noButton)] })
+            .then(dmMessage => {
+                const buttonFilter = (i) => i.user.id === userId;
+                const buttonCollector = dmMessage.createMessageComponentCollector({ filter: buttonFilter, time: 60000 });
+
+                buttonCollector.on('collect', async i => {
+                    if (i.customId === 'yes') {
+                        userStatus[userId] = 'Ready';
+                        const index = usernames.indexOf(user.username + ' (Pending)');
+                        if (index !== -1) {
+                            usernames[index] = user.username + ' (Ready)';
+                        }
+                        await i.update({ content: "You're marked as ready!", components: [] });
+                    } else if (i.customId === 'no') {
+                        const index = usernames.indexOf(user.username + ' (Pending)');
+                        if (index !== -1) {
+                            usernames.splice(index, 1);
+                        }
+                        delete userTimes[userId];
+                        await i.update({ content: "You've been removed from the queue.", components: [] });
+                    }
+                });
+            }).catch(error => {
+                console.error('Could not send DM to user:', error);
+            });
+        }
+    }
+}, 60000);
