@@ -18,8 +18,7 @@ module.exports = {
         .setName('create')
         .setDescription('Let your friends know what game you want to play')
         .addIntegerOption(option => option.setName('team-size').setDescription('The max number of players allowed').setRequired(true))
-        .addRoleOption(option => option.setName('role').setDescription('Notify users of the role selected').setRequired(false))
-        .addStringOption(option => option.setName('time').setDescription('Time you are available (HH:MM AM/PM)').setRequired(false)),
+        .addRoleOption(option => option.setName('role').setDescription('Notify users of the role selected').setRequired(false)),
 
     async execute(interaction) {
         const embed = {
@@ -33,12 +32,7 @@ module.exports = {
         const usernames = [];
         globalUsernames[interaction.id] = usernames;
 
-        const titleOption = interaction.options.getString('title');
         const teamSizeOption = interaction.options.getInteger('team-size');
-
-        if (titleOption) {
-            embed.title = titleOption;
-        }
 
         embed.description += `**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`;
 
@@ -48,11 +42,7 @@ module.exports = {
         const guild = interaction.guild;
         const roleOption = interaction.options.getRole('role');
         if (roleOption) {
-            if (titleOption) {
-                await interaction.channel.send(`LFG ${roleOption} : ${titleOption}`);
-            } else {
-                await interaction.channel.send(`LFG ${roleOption}`);
-            }
+            await interaction.channel.send(`LFG ${roleOption}`);
         }
 
         const filter = i => ['join', 'leave'].includes(i.customId);
