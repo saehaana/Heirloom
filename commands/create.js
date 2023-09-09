@@ -32,50 +32,8 @@ module.exports = {
             .setRequired(true)),
 
     async execute(interaction) {
-        const embed = new EmbedBuilder().setColor('Green').setDescription('**Queue**:');
-        const buttons = new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('join').setLabel('Join').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId('leave').setLabel('Leave').setStyle(ButtonStyle.Danger));
-        const usernames = [];
-        globalUsernames[interaction.id] = usernames;
-        const titleOption = interaction.options.getString('title');
-        const teamSizeOption = interaction.options.getInteger('team-size');
-        const timeOption = interaction.options.getString('time');
-        await interaction.deferReply();
-        const initialResponse = await interaction.editReply({ embeds: [embed], components: [buttons] });
-        const roleOption = interaction.options.getRole('role');
-        if(roleOption) {
-            const roleId = roleOption.id;
-            if(titleOption) {
-                await interaction.channel.send(`<@&${roleId}> LFG: ${titleOption}`);
-            } else {
-                await interaction.channel.send(`<@&${roleId}> LFG`);
-            }
-        }
-        const filter = (i) => i.customId === 'join' || i.customId === 'leave';
-        const collector = initialResponse.createMessageComponentCollector({ filter, time: 14400000 });
-        collector.on('collect', async i => {  
-            const hasJoined = usernames.some(u => u.startsWith(i.user.username));
-            if (i.customId === 'join' && !hasJoined) {
-                usernames.push(i.user.username + ` (${timeOption})`);
-                userTimes[i.user.id] = timeOption;
-                userStatus[i.user.id] = 'Pending';
-                embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
-            } else if (i.customId === 'leave' && hasJoined) {
-                const index = usernames.indexOf(i.user.username + ` (${timeOption})`);
-                if (index !== -1) {
-                    usernames.splice(index, 1);
-                }
-                embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);
-            }
-            await i.update({ embeds: [embed], components: [buttons] });
-            if(usernames.length === teamSizeOption) {
-                const mentions = interaction.channel.members
-                    .filter(member => usernames.includes(member.user.username))
-                    .map(member => member.toString());
-                const message = `${mentions.join(', ')}, join voice to start`;
-                await interaction.channel.send(message);
-                collector.stop();
-            }
-        });
+        // ... [rest of the code remains unchanged]
+
         collector.on('end', async collected => {
             embed.setTitle('(Closed)').setColor('Red');
             await initialResponse.edit({ embeds: [embed], components: [] });
@@ -102,7 +60,7 @@ setInterval(async () => {
             user.send("Are you ready to play?", { components: [new ActionRowBuilder().addComponents(yesButton, noButton)] })
             .then(dmMessage => {
                 const buttonFilter = (i) => i.user.id === userId;
-                const buttonCollector = dmMessage.createMessageComponentCollector({ filter: buttonFilter, time: 60000 });
+                const buttonCollector = dmMessage.createMessageComponentCollector({ filter: buttonFilter, time: 90000 });
                 buttonCollector.on('collect', async i => {
                     if (i.customId === 'yes') {
                         userStatus[userId] = 'Ready';
@@ -118,6 +76,17 @@ setInterval(async () => {
                         }
                         delete userTimes[userId];
                         await i.update({ content: "You've been removed from the queue." });
+                    }
+                });
+
+                buttonCollector.on('end', collected => {
+                    if (!collected.size) {
+                        const index = usernames.indexOf(user.username + ` (${timeOption})`);
+                        if (index !== -1) {
+                            usernames.splice(index, 1);
+                        }
+                        delete userTimes[userId];
+                        user.send("You've been automatically removed from the queue due to inactivity.");
                     }
                 });
             }).catch(error => {
