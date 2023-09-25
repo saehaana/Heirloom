@@ -14,7 +14,7 @@ module.exports = {
         '**Support**\n'+
         'Donations accepted by [Paypal](https://www.paypal.com/donate/?business=LDJMPJV8ER25G&no_recurring=0&item_name=By+donating+you+help+support+the+bot%27s+uptime%21&currency_code=USD)\n\n'+
         '**Report a Bug**\n'+
-        'Send me a DM at osutin#5152 or use /reportbug')
+        'Send a DM to osutin on Discord or use /reportbug')
 
         interaction.reply({ embeds: [embed] });
     },
