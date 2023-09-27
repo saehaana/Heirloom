@@ -20,6 +20,9 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setColor('Green')
             .setDescription('**Queue**:')
+            .setTimestamp()
+            .setFooter({ text: ' ', iconURL: 'https://i.imgur.com/AfFp7pu.png' })
+            .setAuthor({ name: `Host: ${interaction.user.username}` })
 
         // Row of buttons that lets users decide if they want to play
         const buttons = new ActionRowBuilder()
@@ -51,6 +54,7 @@ module.exports = {
         }
 
 		await interaction.deferReply();
+
         // Send the initial response with the embed and buttons
         const initialResponse = await interaction.editReply({ embeds: [embed], components: [buttons] }); 
 
@@ -81,25 +85,19 @@ module.exports = {
             // Update the embed based on which button was clicked
             if (i.customId === 'join') {
                 // Ensures only unique names are added to the embed
-                if(!usernames.includes(i.user.username)){
-                    usernames.push(i.user.username);
+                if(!usernames.includes(i.user)){
+                    usernames.push(i.user);
                 } 
-                if(teamSizeOption !== null){
-                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);                
-                }else{
-                    embed.setDescription(`**Queue (${usernames.length})**: \n ${usernames.join('\n')}`);
-                }
+
+                embed.setDescription(`${i.user} has joined the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);                
+                
             } else if (i.customId === 'leave') {
                 // Remove the user's username from the list of joined users
-				const index = usernames.indexOf(i.user.username);
+				const index = usernames.indexOf(i.user);
 				if (index !== -1) {
 					usernames.splice(index, 1);
+                    embed.setDescription(`${i.user} has left the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);   
 				}   
-                if(teamSizeOption !== null){
-                    embed.setDescription(`**Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);                
-                }else{
-                    embed.setDescription(`**Queue (${usernames.length})**: \n ${usernames.join('\n')}`);
-                }
             } 
      
             // Edit the original message with the updated embed
@@ -110,7 +108,7 @@ module.exports = {
 				// Get collection of all members in channel
 				const mentions = interaction.channel.members
 				// Filter collection to users that stayed in queue
-				.filter(member => usernames.includes(member.user.username))
+				.filter(member => usernames.includes(member.user))
 				// Tag each member with the '@' symbol to mention them by converting member objects to a string
 				.map(member => member.toString());
 
