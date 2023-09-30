@@ -21,8 +21,6 @@ module.exports = {
             .setColor('Green')
             .setDescription('**Queue**:')
             .setTimestamp()
-            .setFooter({ text: ' ', iconURL: 'https://i.imgur.com/AfFp7pu.png' })
-            .setAuthor({ name: `Host: ${interaction.user.username}` })
 
         // Row of buttons that lets users decide if they want to play
         const buttons = new ActionRowBuilder()
@@ -87,16 +85,15 @@ module.exports = {
                 // Ensures only unique names are added to the embed
                 if(!usernames.includes(i.user)){
                     usernames.push(i.user);
+                    embed.setDescription(`${i.user} has joined the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();                
                 } 
 
-                embed.setDescription(`${i.user} has joined the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);                
-                
             } else if (i.customId === 'leave') {
                 // Remove the user's username from the list of joined users
 				const index = usernames.indexOf(i.user);
 				if (index !== -1) {
 					usernames.splice(index, 1);
-                    embed.setDescription(`${i.user} has left the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`);   
+                    embed.setDescription(`${i.user} has left the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
 				}   
             } 
      
