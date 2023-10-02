@@ -76,7 +76,7 @@ module.exports = {
         
         // Create a message component collector to listen for button clicks
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
-        const collector = initialResponse.createMessageComponentCollector({ filter, time: 14400000 });
+        const collector = initialResponse.createMessageComponentCollector({ filter });
         let message = "";
 
         collector.on('collect', async i => {  
@@ -86,6 +86,9 @@ module.exports = {
                 if(!usernames.includes(i.user)){
                     usernames.push(i.user);
                     embed.setDescription(`${i.user} has joined the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();                
+                
+                    // Edit the original message with the updated embed
+                    await i.update({ embeds: [embed], components: [buttons] });
                 } 
 
             } else if (i.customId === 'leave') {
@@ -94,12 +97,16 @@ module.exports = {
 				if (index !== -1) {
 					usernames.splice(index, 1);
                     embed.setDescription(`${i.user} has left the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
-				}   
+                
+                    await i.update({ embeds: [embed], components: [buttons] });
+                }
+
+                if(usernames.length <= 0){
+                    collector.stop();
+                }
+
             } 
      
-            // Edit the original message with the updated embed
-            await i.update({ embeds: [embed], components: [buttons] });
-
             // Check if the queue player count has been satisfied
 			if(usernames.length === teamSizeOption){
 				// Get collection of all members in channel
@@ -119,17 +126,26 @@ module.exports = {
         });
      
         collector.on('end', async collected => {
-            if(titleOption !== null){
-                embed.setTitle(`${titleOption} (Closed)`);
-            }else{
-                embed.setTitle('(Closed)');
+            if(teamSizeOption == usernames.length){
+                if(titleOption !== null){
+                    embed.setTitle(`${titleOption} (Closed)`);
+                }else{
+                    embed.setTitle('(Closed)');
+                }
+                embed.setColor('Red');
+    
+                // Remove the buttons from the original message when the collector ends
+                await initialResponse.edit({ embeds: [embed], components: [] });
             }
-            embed.setColor('Red');
 
-            // Remove the buttons from the original message when the collector ends
-            await initialResponse.edit({ embeds: [embed], components: [] });
+            if(usernames.length <= 0){
+                const embedCancel = new EmbedBuilder()
+                .setColor('Red')
+                .setTitle('Canceled') 
 
-            collector.stop();
+                await initialResponse.edit({ embeds: [embedCancel], components: [] });   
+            }
+            
         });
 	},
 };  
