@@ -126,18 +126,6 @@ module.exports = {
         });
      
         collector.on('end', async collected => {
-            if(teamSizeOption == usernames.length){
-                if(titleOption !== null){
-                    embed.setTitle(`${titleOption} (Closed)`);
-                }else{
-                    embed.setTitle('(Closed)');
-                }
-                embed.setColor('Red');
-    
-                // Remove the buttons from the original message when the collector ends
-                await initialResponse.edit({ embeds: [embed], components: [] });
-            }
-
             if(usernames.length <= 0){
                 const embedCancel = new EmbedBuilder()
                 .setColor('Red')
@@ -145,7 +133,16 @@ module.exports = {
 
                 await initialResponse.edit({ embeds: [embedCancel], components: [] });   
             }
-            
+
+            if(titleOption !== null){
+                embed.setTitle(`${titleOption} (Closed)`);
+            }else{
+                embed.setTitle('(Closed)');
+            }
+            embed.setColor('Red');
+
+            // Remove the buttons from the original message when the collector ends
+            await initialResponse.edit({ embeds: [embed], components: [] });
         });
 	},
 };  
