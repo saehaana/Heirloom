@@ -132,17 +132,17 @@ module.exports = {
                 .setTitle('Canceled') 
 
                 await initialResponse.edit({ embeds: [embedCancel], components: [] });   
-            }
-
-            if(titleOption !== null){
-                embed.setTitle(`${titleOption} (Closed)`);
             }else{
-                embed.setTitle('(Closed)');
+                if(titleOption !== null){
+                    embed.setTitle(`${titleOption} (Closed)`);
+                }else{
+                    embed.setTitle('(Closed)');
+                }
+                embed.setColor('Red');
+    
+                // Remove the buttons from the original message when the collector ends
+                await initialResponse.edit({ embeds: [embed], components: [] });
             }
-            embed.setColor('Red');
-
-            // Remove the buttons from the original message when the collector ends
-            await initialResponse.edit({ embeds: [embed], components: [] });
         });
 	},
 };  
