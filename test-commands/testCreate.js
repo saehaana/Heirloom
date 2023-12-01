@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('testcreate')
+		.setName('temp')
 		.setDescription('Let your friends know what game you want to play')
         .addIntegerOption(option => 
             option.setName('team-size')
@@ -42,7 +42,7 @@ module.exports = {
 
         // Row of buttons that lets users decide if they want to play
         const testbuttons = new ActionRowBuilder()
-        .addComponents( 
+        .addComponents(
             new ButtonBuilder()
                 .setCustomId('ready')
                 .setLabel(`Ready`)
@@ -98,11 +98,93 @@ module.exports = {
         let collector = initialResponse.createMessageComponentCollector({ filter, time: 18000000});
         let message = "";
 
-        // Create a message component collector to listen for button clicks
-        const testfilter = (i) => i.customId === 'ready' || i.customId === 'notready';
-        let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 60000});
-        let testmessage = "";
-        let testcount = 0;
+        
+
+        function startCollector(){
+            // Create a message component collector to listen for button clicks
+            const testfilter = (i) => i.customId === 'ready' || i.customId === 'notready';
+            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 6000});
+            let testmessage = "";
+            let testcount = 0;
+            let removeusernames =  [];
+
+            testcollector.on('collect', async i => {  
+                // Update the embed based on which button was clicked
+                if (i.customId === 'ready') {
+                    // Ensures only unique names are added to the embed
+                    if(usernames.includes(i.user)){
+                        testusernames.push(`${i.user} :white_check_mark:`);
+                        testembed.setDescription(`${testusernames.join('\n')}`);     
+                        testcount++;         
+                    
+                        // Edit the original message with the updated embed
+                        await i.update({ embeds: [testembed], components: [testbuttons] });
+                    } 
+    
+                } else if (i.customId === 'notready') {
+                    const index = usernames.indexOf(i.user);
+                    if(usernames.includes(i.user)){
+                        testusernames.push(`${i.user} :x:`);
+                        testembed.setDescription(`${testusernames.join('\n')}`);     
+                        usernames.splice(index, 1);
+
+                        removeusernames.push(i.user);
+
+                        // Edit the original message with the updated embed
+                        await i.update({ embeds: [testembed], components: [testbuttons] });   
+    
+                        setTimeout(() => {
+                            // testcount = 0;
+                            // testusernames = [];
+                            // testembed.setDescription(' ');
+                            // interaction.editReply({ embeds: [embed], components: [buttons] }); 
+                            testcollector.stop(); 
+                        }, 5000);
+                        
+                    } 
+    
+                } 
+         
+                // Check if the queue player count has been satisfied
+                if(testcount == teamSizeOption){
+                    // Get collection of all members in channel
+                    const mentions = interaction.channel.members
+                    // Filter collection to users that stayed in queue
+                    .filter(member => usernames.includes(member.user))
+                    // Tag each member with the '@' symbol to mention them by converting member objects to a string
+                    .map(member => member.toString());
+    
+                    testmessage = `${mentions.join(', ')}, join voice to start`;
+                    await interaction.channel.send(testmessage);
+                    
+                    // Close the queue when filled
+                    testcollector.stop();
+                }
+                
+            });
+
+            testcollector.on('end', async (collected, reason) => {
+                if(testcount == teamSizeOption){
+                    collector.stop();
+                }else{
+                    embed.setDescription(`${testusernames.join('\n')} has been removed from queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();
+                    testcount = 0;
+                    testusernames = [];
+                    testembed.setDescription(' ');
+                    
+                    await interaction.editReply({ embeds: [embed], components: [buttons] }); 
+                }
+
+                // if (reason === 'time'){
+                //     testcount = 0;
+                //     testusernames = [];
+                //     testembed.setDescription(' ');
+                //     usernames = [];
+                //     embed.setDescription(`${testusernames.join('\n')} has been removed from queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();
+                //     await interaction.editReply({ embeds: [embed], components: [buttons] }); 
+                // }
+            });
+        }
 
         collector.on('collect', async i => {  
             // Update the embed based on which button was clicked
@@ -145,69 +227,9 @@ module.exports = {
 				await interaction.channel.send(message);
                 
                 await interaction.editReply({ embeds: [testembed], components: [testbuttons] }); 
+                startCollector();
 			}
 			
-        });
-
-        testcollector.on('collect', async i => {  
-            // Update the embed based on which button was clicked
-            if (i.customId === 'ready') {
-                // Ensures only unique names are added to the embed
-                if(usernames.includes(i.user)){
-                    testusernames.push(`${i.user} :white_check_mark:`);
-                    testembed.setDescription(`${testusernames.join('\n')}`);     
-                    testcount++;         
-                
-                    // Edit the original message with the updated embed
-                    await i.update({ embeds: [testembed], components: [testbuttons] });
-                } 
-
-            } else if (i.customId === 'notready') {
-                const index = usernames.indexOf(i.user);
-                if(usernames.includes(i.user)){
-                    testusernames.push(`${i.user} :x:`);
-                    testembed.setDescription(`${testusernames.join('\n')}`);     
-                    usernames.splice(index, 1);
-
-                    embed.setDescription(`${testusernames.join('\n')} has been removed from queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();
-                    
-                    // Edit the original message with the updated embed
-                    await i.update({ embeds: [testembed], components: [testbuttons] });   
-
-                    setTimeout(() => {
-                        testcount = 0;
-                        testusernames = [];
-                        console.log(testusernames.length);
-                        testembed.setDescription(' ');
-                        interaction.editReply({ embeds: [embed], components: [buttons] }); 
-                    }, 5000);
-                    
-                } 
-
-            } 
-     
-            // Check if the queue player count has been satisfied
-			if(testcount == teamSizeOption){
-				// Get collection of all members in channel
-				const mentions = interaction.channel.members
-				// Filter collection to users that stayed in queue
-				.filter(member => usernames.includes(member.user))
-				// Tag each member with the '@' symbol to mention them by converting member objects to a string
-				.map(member => member.toString());
-
-				testmessage = `${mentions.join(', ')}, join voice to start`;
-				await interaction.channel.send(testmessage);
-				
-				// Close the queue when filled
-				collector.stop();
-			}
-			
-        });
-
-        testcollector.on('end', async collected => {
-            testcount = 0;
-            testembed.setDescription(' ');
-            await interaction.editReply({ embeds: [embed], components: [buttons] }); 
         });
      
         collector.on('end', async collected => {
