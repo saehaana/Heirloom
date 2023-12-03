@@ -35,27 +35,7 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger)
         );
 
-        const testembed = new EmbedBuilder()
-            .setColor('Yellow')
-            .setTitle('**Ready Check**:')
-            .setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban')
-            .setTimestamp()
-
-        // Row of buttons that lets users decide if they want to play
-        const testbuttons = new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId('ready')
-                .setLabel(`Ready`)
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId('notready')
-                .setLabel(`Not Ready`)
-                .setStyle(ButtonStyle.Primary)
-        );
-
         let usernames = [];
-        let testusernames = [];
         const titleOption = interaction.options.getString('title');
         const teamSizeOption = interaction.options.getInteger('team-size');
 
@@ -96,113 +76,8 @@ module.exports = {
         
         // Create a message component collector to listen for button clicks
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
-        let collector = initialResponse.createMessageComponentCollector({ filter, time: 18000000});
+        const collector = initialResponse.createMessageComponentCollector({ filter, time: 18000000});
         let message = "";
-
-        function startCollector(){
-            // Create a message component collector to listen for button clicks
-            const testfilter = (i) => i.customId === 'ready' || i.customId === 'notready';
-            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 60000});
-            let testmessage = "";
-            let testcount = 0;
-            let saveUsers =  [];
-            let removeUsers = [];
-            let userNotReady = false;
-
-            testcollector.on('collect', async i => {  
-                // Update the embed based on which button was clicked
-                if (i.customId === 'ready') {
-                    // Ensures only unique names are added to the embed
-                    if(usernames.includes(i.user)){
-                        testusernames.push(`${i.user} :white_check_mark:`);
-                        testembed.setDescription(`You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
-                        testcount++; 
-                        
-                        saveUsers.push(i.user);
-                        
-                        // Edit the original message with the updated embed
-                        await i.update({ embeds: [testembed], components: [testbuttons] });
-                    } 
-    
-                } else if (i.customId === 'notready') {
-                    const index = usernames.indexOf(i.user);
-                    if(usernames.includes(i.user)){
-                        removeUsers.push(i.user);
-                        userNotReady = true;
-                        testusernames.push(`${i.user} :x:`);
-                        testembed.setDescription(`You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
-                        usernames.splice(index, 1);
-
-                        // Edit the original message with the updated embed
-                        await i.update({ embeds: [testembed], components: [testbuttons] });   
-    
-                        setTimeout(() => {
-                            testcollector.stop(); 
-                        }, 5000);
-                        
-                    } 
-    
-                } 
-         
-                // Check if the queue player count has been satisfied
-                if(testcount == teamSizeOption){
-                    // Get collection of all members in channel
-                    const mentions = interaction.channel.members
-                    // Filter collection to users that stayed in queue
-                    .filter(member => usernames.includes(member.user))
-                    // Tag each member with the '@' symbol to mention them by converting member objects to a string
-                    .map(member => member.toString());
-    
-                    testmessage = `${mentions.join(' ')}, join voice to start`;
-                    await interaction.channel.send(testmessage);
-                    
-                    // Close the queue when filled
-                    testcollector.stop();
-                }
-                
-            });
-
-            testcollector.on('end', async (collected, reason) => {
-                // Case 1 : All users ready
-                if(testcount == teamSizeOption){
-                    collector.stop();
-                }
-                // Case 2 : User clicks Not Ready button
-                else if(userNotReady == true){
-                    embed.setDescription(`Players removed : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
-
-                    // Reset values
-                    testembed.setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n');
-                    testcount = 0;
-                    testusernames = [];
-                    removeUsers = [];
-                    userNotReady = false;
-                    
-                    await interaction.editReply({ embeds: [embed], components: [buttons] }); 
-                }
-                // Case 3 : Timeout
-                else{
-                    for(let i = usernames.length-1; i >= 0; i--){
-                        if(!(saveUsers.includes(usernames[i]))){
-                            removeUsers.push(usernames[i]);
-                            usernames.splice(i,1);
-                        }
-                    } 
-
-                    if(removeUsers.length >= 1){
-                        embed.setDescription(`Players removed : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
-                    }
-                    
-                    // Reset values
-                    testembed.setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n'); 
-                    testcount = 0;
-                    testusernames = [];
-                    removeUsers = [];
-                    
-                    await interaction.editReply({ embeds: [embed], components: [buttons] });
-                }            
-            });
-        }
 
         collector.on('collect', async i => {  
             // Update the embed based on which button was clicked
@@ -211,7 +86,7 @@ module.exports = {
                 if(!usernames.includes(i.user)){
                     usernames.push(i.user);
                     embed.setDescription(`${i.user} has joined the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();                
-    
+                
                     // Edit the original message with the updated embed
                     await i.update({ embeds: [embed], components: [buttons] });
                 } 
@@ -241,11 +116,11 @@ module.exports = {
 				// Tag each member with the '@' symbol to mention them by converting member objects to a string
 				.map(member => member.toString());
 
-				message = `${mentions.join(' ')}`;
+				message = `${mentions.join(', ')}, join voice to start`;
 				await interaction.channel.send(message);
-                
-                await interaction.editReply({ embeds: [testembed], components: [testbuttons] }); 
-                startCollector();
+				
+				// Close the queue when filled
+				collector.stop();
 			}
 			
         });
