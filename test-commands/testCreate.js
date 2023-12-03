@@ -38,6 +38,7 @@ module.exports = {
         const testembed = new EmbedBuilder()
             .setColor('Yellow')
             .setTitle('**Ready Check**:')
+            .setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban')
             .setTimestamp()
 
         // Row of buttons that lets users decide if they want to play
@@ -101,7 +102,7 @@ module.exports = {
         function startCollector(){
             // Create a message component collector to listen for button clicks
             const testfilter = (i) => i.customId === 'ready' || i.customId === 'notready';
-            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 6000});
+            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 60000});
             let testmessage = "";
             let testcount = 0;
             let saveUsers =  [];
@@ -114,7 +115,7 @@ module.exports = {
                     // Ensures only unique names are added to the embed
                     if(usernames.includes(i.user)){
                         testusernames.push(`${i.user} :white_check_mark:`);
-                        testembed.setDescription(`${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
                         testcount++; 
                         
                         saveUsers.push(i.user);
@@ -129,7 +130,7 @@ module.exports = {
                         removeUsers.push(i.user);
                         userNotReady = true;
                         testusernames.push(`${i.user} :x:`);
-                        testembed.setDescription(`${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
                         usernames.splice(index, 1);
 
                         // Edit the original message with the updated embed
@@ -152,7 +153,7 @@ module.exports = {
                     // Tag each member with the '@' symbol to mention them by converting member objects to a string
                     .map(member => member.toString());
     
-                    testmessage = `${mentions.join(', ')}, join voice to start`;
+                    testmessage = `${mentions.join(' ')}, join voice to start`;
                     await interaction.channel.send(testmessage);
                     
                     // Close the queue when filled
@@ -168,10 +169,10 @@ module.exports = {
                 }
                 // Case 2 : User clicks Not Ready button
                 else if(userNotReady == true){
-                    embed.setDescription(`${removeUsers.join('\n')} has been removed from queue \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
+                    embed.setDescription(`Players removed : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
 
                     // Reset values
-                    testembed.setDescription(' ');
+                    testembed.setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n');
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
@@ -188,15 +189,12 @@ module.exports = {
                         }
                     } 
 
-                    if(removeUsers.length == 1){
-                        embed.setDescription(`${removeUsers.join('\n')} has been removed from queue \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
-                    }
-                    if(removeUsers.length > 1){
-                        embed.setDescription(`${removeUsers.join('\n')} have been removed from queue \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
+                    if(removeUsers.length >= 1){
+                        embed.setDescription(`Players removed : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
                     }
                     
                     // Reset values
-                    testembed.setDescription(' '); 
+                    testembed.setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n'); 
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
