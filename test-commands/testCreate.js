@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('temp')
+		.setName('testcreate')
 		.setDescription('Let your friends know what game you want to play')
         .addIntegerOption(option => 
             option.setName('team-size')
@@ -98,15 +98,15 @@ module.exports = {
         let collector = initialResponse.createMessageComponentCollector({ filter, time: 18000000});
         let message = "";
 
-        
-
         function startCollector(){
             // Create a message component collector to listen for button clicks
             const testfilter = (i) => i.customId === 'ready' || i.customId === 'notready';
             let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 6000});
             let testmessage = "";
             let testcount = 0;
-            let removeusernames =  [];
+            let saveUsers =  [];
+            let removeUsers = [];
+            let userNotReady = false;
 
             testcollector.on('collect', async i => {  
                 // Update the embed based on which button was clicked
@@ -115,8 +115,10 @@ module.exports = {
                     if(usernames.includes(i.user)){
                         testusernames.push(`${i.user} :white_check_mark:`);
                         testembed.setDescription(`${testusernames.join('\n')}`);     
-                        testcount++;         
-                    
+                        testcount++; 
+                        
+                        saveUsers.push(i.user);
+                        
                         // Edit the original message with the updated embed
                         await i.update({ embeds: [testembed], components: [testbuttons] });
                     } 
@@ -124,20 +126,16 @@ module.exports = {
                 } else if (i.customId === 'notready') {
                     const index = usernames.indexOf(i.user);
                     if(usernames.includes(i.user)){
+                        removeUsers.push(i.user);
+                        userNotReady = true;
                         testusernames.push(`${i.user} :x:`);
                         testembed.setDescription(`${testusernames.join('\n')}`);     
                         usernames.splice(index, 1);
-
-                        removeusernames.push(i.user);
 
                         // Edit the original message with the updated embed
                         await i.update({ embeds: [testembed], components: [testbuttons] });   
     
                         setTimeout(() => {
-                            // testcount = 0;
-                            // testusernames = [];
-                            // testembed.setDescription(' ');
-                            // interaction.editReply({ embeds: [embed], components: [buttons] }); 
                             testcollector.stop(); 
                         }, 5000);
                         
@@ -164,25 +162,47 @@ module.exports = {
             });
 
             testcollector.on('end', async (collected, reason) => {
+                // Case 1 : All users ready
                 if(testcount == teamSizeOption){
                     collector.stop();
-                }else{
-                    embed.setDescription(`${testusernames.join('\n')} has been removed from queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();
+                }
+                // Case 2 : User clicks Not Ready button
+                else if(userNotReady == true){
+                    embed.setDescription(`${removeUsers.join('\n')} has been removed from queue \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
+
+                    // Reset values
+                    testembed.setDescription(' ');
                     testcount = 0;
                     testusernames = [];
-                    testembed.setDescription(' ');
+                    removeUsers = [];
+                    userNotReady = false;
                     
                     await interaction.editReply({ embeds: [embed], components: [buttons] }); 
                 }
+                // Case 3 : Timeout
+                else{
+                    for(let i = usernames.length-1; i >= 0; i--){
+                        if(!(saveUsers.includes(usernames[i]))){
+                            removeUsers.push(usernames[i]);
+                            usernames.splice(i,1);
+                        }
+                    } 
 
-                // if (reason === 'time'){
-                //     testcount = 0;
-                //     testusernames = [];
-                //     testembed.setDescription(' ');
-                //     usernames = [];
-                //     embed.setDescription(`${testusernames.join('\n')} has been removed from queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();
-                //     await interaction.editReply({ embeds: [embed], components: [buttons] }); 
-                // }
+                    if(removeUsers.length == 1){
+                        embed.setDescription(`${removeUsers.join('\n')} has been removed from queue \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
+                    }
+                    if(removeUsers.length > 1){
+                        embed.setDescription(`${removeUsers.join('\n')} have been removed from queue \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
+                    }
+                    
+                    // Reset values
+                    testembed.setDescription(' '); 
+                    testcount = 0;
+                    testusernames = [];
+                    removeUsers = [];
+                    
+                    await interaction.editReply({ embeds: [embed], components: [buttons] });
+                }            
             });
         }
 
@@ -193,7 +213,7 @@ module.exports = {
                 if(!usernames.includes(i.user)){
                     usernames.push(i.user);
                     embed.setDescription(`${i.user} has joined the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();                
-                
+    
                     // Edit the original message with the updated embed
                     await i.update({ embeds: [embed], components: [buttons] });
                 } 
@@ -223,7 +243,7 @@ module.exports = {
 				// Tag each member with the '@' symbol to mention them by converting member objects to a string
 				.map(member => member.toString());
 
-				message = `${mentions.join(', ')}, ready check`;
+				message = `${mentions.join(' ')}`;
 				await interaction.channel.send(message);
                 
                 await interaction.editReply({ embeds: [testembed], components: [testbuttons] }); 
