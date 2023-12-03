@@ -35,7 +35,27 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger)
         );
 
+        const testembed = new EmbedBuilder()
+            .setColor('Yellow')
+            .setTitle('**Ready Check**:')
+            .setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban')
+            .setTimestamp()
+
+        // Row of buttons that lets users decide if they want to play
+        const testbuttons = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('ready')
+                .setLabel(`Ready`)
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('notready')
+                .setLabel(`Not Ready`)
+                .setStyle(ButtonStyle.Primary)
+        );
+
         let usernames = [];
+        let testusernames = [];
         const titleOption = interaction.options.getString('title');
         const teamSizeOption = interaction.options.getInteger('team-size');
 
@@ -76,7 +96,7 @@ module.exports = {
         
         // Create a message component collector to listen for button clicks
         const filter = (i) => i.customId === 'join' || i.customId === 'leave';
-        const collector = initialResponse.createMessageComponentCollector({ filter, time: 18000000});
+        let collector = initialResponse.createMessageComponentCollector({ filter, time: 18000000});
         let message = "";
 
         function startCollector(){
@@ -183,15 +203,15 @@ module.exports = {
                 }            
             });
         }
- 
-        collector.on('collect', async i => {
+
+        collector.on('collect', async i => {  
             // Update the embed based on which button was clicked
             if (i.customId === 'join') {
                 // Ensures only unique names are added to the embed
                 if(!usernames.includes(i.user)){
                     usernames.push(i.user);
                     embed.setDescription(`${i.user} has joined the queue\n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();                
-                
+    
                     // Edit the original message with the updated embed
                     await i.update({ embeds: [embed], components: [buttons] });
                 } 
@@ -221,11 +241,11 @@ module.exports = {
 				// Tag each member with the '@' symbol to mention them by converting member objects to a string
 				.map(member => member.toString());
 
-				message = `${mentions.join(', ')}, join voice to start`;
+				message = `${mentions.join(' ')}`;
 				await interaction.channel.send(message);
-				
-				// Close the queue when filled
-				collector.stop();
+                
+                await interaction.editReply({ embeds: [testembed], components: [testbuttons] }); 
+                startCollector();
 			}
 			
         });
