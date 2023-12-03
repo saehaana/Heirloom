@@ -204,7 +204,7 @@ module.exports = {
             });
         }
 
-        collector.on('collect', async i => {  
+        collector.on('collect', async i => {   
             // Update the embed based on which button was clicked
             if (i.customId === 'join') {
                 // Ensures only unique names are added to the embed
