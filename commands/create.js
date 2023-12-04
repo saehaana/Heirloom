@@ -115,7 +115,7 @@ module.exports = {
                     // Ensures only unique names are added to the embed
                     if(usernames.includes(i.user)){
                         testusernames.push(`${i.user} :white_check_mark:`);
-                        testembed.setDescription(`You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
                         testcount++; 
                         
                         saveUsers.push(i.user);
@@ -130,7 +130,7 @@ module.exports = {
                         removeUsers.push(i.user);
                         userNotReady = true;
                         testusernames.push(`${i.user} :x:`);
-                        testembed.setDescription(`You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
                         usernames.splice(index, 1);
 
                         // Edit the original message with the updated embed
@@ -172,7 +172,7 @@ module.exports = {
                     embed.setDescription(`Players removed : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
 
                     // Reset values
-                    testembed.setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n');
+                    testembed.setDescription('You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n');
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
@@ -194,7 +194,7 @@ module.exports = {
                     }
                     
                     // Reset values
-                    testembed.setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n'); 
+                    testembed.setDescription('You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n'); 
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
