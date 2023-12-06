@@ -178,7 +178,7 @@ module.exports = {
                     removeUsers = [];
                     userNotReady = false;
                     
-                    await interaction.editReply({ embeds: [embed], components: [buttons] }); 
+                    await initialResponse.edit({ embeds: [embed], components: [buttons] }); 
                 }
                 // Case 3 : Timeout
                 else{
@@ -199,7 +199,7 @@ module.exports = {
                     testusernames = [];
                     removeUsers = [];
                     
-                    await interaction.editReply({ embeds: [embed], components: [buttons] });
+                    await initialResponse.edit({ embeds: [embed], components: [buttons] });
                 }            
             });
         }
