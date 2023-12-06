@@ -38,7 +38,7 @@ module.exports = {
         const testembed = new EmbedBuilder()
             .setColor('Yellow')
             .setTitle('**Ready Check**:')
-            .setDescription('You have 1 minute ready up or be kicked, failing multiple ready checks will result in a temp ban')
+            .setDescription('You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban')
             .setTimestamp()
 
         // Row of buttons that lets users decide if they want to play
