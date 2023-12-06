@@ -244,7 +244,7 @@ module.exports = {
 				message = `${mentions.join(' ')}`;
 				await interaction.channel.send(message);
                 
-                await interaction.editReply({ embeds: [testembed], components: [testbuttons] }); 
+                await initialResponse.edit({ embeds: [testembed], components: [testbuttons] }); 
                 startCollector();
 			}
 			
