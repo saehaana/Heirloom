@@ -169,7 +169,7 @@ module.exports = {
                 }
                 // Case 2 : User clicks Not Ready button
                 else if(userNotReady == true){
-                    embed.setDescription(`Players removed : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
+                    embed.setDescription(`Players not ready : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
 
                     // Reset values
                     testembed.setDescription('You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n');
@@ -190,7 +190,7 @@ module.exports = {
                     } 
 
                     if(removeUsers.length >= 1){
-                        embed.setDescription(`Players removed : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
+                        embed.setDescription(`Players not ready : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
                     }
                     
                     // Reset values
