@@ -38,7 +38,7 @@ module.exports = {
         const testembed = new EmbedBuilder()
             .setColor('Yellow')
             .setTitle('**Ready Check**:')
-            .setDescription('You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban')
+            .setDescription('You have 2 minutes to ready up or be kicked')
             .setTimestamp()
 
         // Row of buttons that lets users decide if they want to play
@@ -102,7 +102,7 @@ module.exports = {
         function startCollector(){
             // Create a message component collector to listen for button clicks
             const testfilter = (i) => i.customId === 'ready' || i.customId === 'notready';
-            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 60000});
+            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 120000});
             let testmessage = "";
             let testcount = 0;
             let saveUsers =  [];
@@ -115,7 +115,7 @@ module.exports = {
                     // Ensures only unique names are added to the embed
                     if(usernames.includes(i.user)){
                         testusernames.push(`${i.user} :white_check_mark:`);
-                        testembed.setDescription(`You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 2 minutes to ready up or be kicked \n\n ${testusernames.join('\n')}`);     
                         testcount++; 
                         
                         saveUsers.push(i.user);
@@ -130,7 +130,7 @@ module.exports = {
                         removeUsers.push(i.user);
                         userNotReady = true;
                         testusernames.push(`${i.user} :x:`);
-                        testembed.setDescription(`You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n ${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 2 minutes to ready up or be kicked \n\n ${testusernames.join('\n')}`);     
                         usernames.splice(index, 1);
 
                         // Edit the original message with the updated embed
@@ -172,7 +172,7 @@ module.exports = {
                     embed.setDescription(`Players not ready : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
 
                     // Reset values
-                    testembed.setDescription('You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n');
+                    testembed.setDescription('You have 2 minutes to ready up or be kicked \n\n');
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
@@ -194,7 +194,7 @@ module.exports = {
                     }
                     
                     // Reset values
-                    testembed.setDescription('You have 1 minute to ready up or be kicked, failing multiple ready checks will result in a temp ban \n\n'); 
+                    testembed.setDescription('You have 2 minutes to ready up or be kicked \n\n'); 
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
