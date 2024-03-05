@@ -86,12 +86,7 @@ module.exports = {
         // Check if 'role' option provided, check if role exists in the guild
         if(roleOption && roles.has(roleOption.id)){
             // Send message to users based on command options provided
-            if(titleOption){
-                await interaction.channel.send(`LFG ${roleOption} : ${titleOption}`);
-            }else{
-                await interaction.channel.send(`LFG ${roleOption}`);
-            }
-            
+            await interaction.channel.send(roleOption); 
         }
         
         // Create a message component collector to listen for button clicks
