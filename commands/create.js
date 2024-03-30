@@ -86,7 +86,7 @@ module.exports = {
         // Check if 'role' option provided, check if role exists in the guild
         if(roleOption && roles.has(roleOption.id)){
             // Send message to users based on command options provided
-            await interaction.channel.send(roleOption); 
+            await interaction.channel.send(`${roleOption}`); 
         }
         
         // Create a message component collector to listen for button clicks
@@ -97,7 +97,7 @@ module.exports = {
         function startCollector(){
             // Create a message component collector to listen for button clicks
             const testfilter = (i) => i.customId === 'ready' || i.customId === 'notready';
-            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 120000});
+            let testcollector = initialResponse.createMessageComponentCollector({ testfilter, time: 300000});
             let testmessage = "";
             let testcount = 0;
             let saveUsers =  [];
@@ -110,7 +110,7 @@ module.exports = {
                     // Ensures only unique names are added to the embed
                     if(usernames.includes(i.user)){
                         testusernames.push(`${i.user} :white_check_mark:`);
-                        testembed.setDescription(`You have 2 minutes to ready up or be kicked \n\n ${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 5 minutes to ready up or be kicked \n\n ${testusernames.join('\n')}`);     
                         testcount++; 
                         
                         saveUsers.push(i.user);
@@ -125,7 +125,7 @@ module.exports = {
                         removeUsers.push(i.user);
                         userNotReady = true;
                         testusernames.push(`${i.user} :x:`);
-                        testembed.setDescription(`You have 2 minutes to ready up or be kicked \n\n ${testusernames.join('\n')}`);     
+                        testembed.setDescription(`You have 5 minutes to ready up or be kicked \n\n ${testusernames.join('\n')}`);     
                         usernames.splice(index, 1);
 
                         // Edit the original message with the updated embed
@@ -167,7 +167,7 @@ module.exports = {
                     embed.setDescription(`Players not ready : ${removeUsers.join(' ')} \n\n **Queue (${usernames.length} / ${teamSizeOption})**: \n ${usernames.join('\n')}`).setTimestamp();   
 
                     // Reset values
-                    testembed.setDescription('You have 2 minutes to ready up or be kicked \n\n');
+                    testembed.setDescription('You have 5 minutes to ready up or be kicked \n\n');
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
@@ -189,7 +189,7 @@ module.exports = {
                     }
                     
                     // Reset values
-                    testembed.setDescription('You have 2 minutes to ready up or be kicked \n\n'); 
+                    testembed.setDescription('You have 5 minutes to ready up or be kicked \n\n'); 
                     testcount = 0;
                     testusernames = [];
                     removeUsers = [];
